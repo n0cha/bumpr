@@ -29,6 +29,11 @@
         <icon height="87" platform="ios" src="icon/ios/Icon-App-29x29@3x.png" width="87" />
     </platform>    
     <platform name="android">
-        <icon src="icon.png" platform="android" qualifier="hdpi" />
+        <icon density="ldpi" src="icon/android/mipmap-ldpi/ic_launcher.png" />
+        <icon density="mdpi" src="icon/android/mipmap-mdpi/ic_launcher.png" />
+        <icon density="hdpi" src="icon/android/mipmap-hdpi/ic_launcher.png" />
+        <icon density="xhdpi" src="icon/android/mipmap-xhdpi/ic_launcher.png" />
+        <icon density="xxhdpi" src="icon/android/mipmap-xxhdpi/ic_launcher.png" />
+        <icon density="xxxhdpi" src="icon/android/mipmap-xxxhdpi/ic_launcher.png" />
     </platform>    
 </widget>

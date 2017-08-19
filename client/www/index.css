@@ -1,0 +1,42 @@
+body {
+  margin: 0px;
+  font-family: "Helvetica Neue", Helvetica, sans-serif;  
+  background-color: #ddd;
+}
+
+#header {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-left: 0px;
+  margin-right: 0px;
+  background-color: #333;
+  width: 100%;
+  padding: 5px;
+  color: #eee;
+}
+
+#main {
+	display: grid;	
+  grid-template-columns: auto 80% auto;  
+}
+
+#plateNumber {
+  grid-column: 2;
+  font-size: 20px;
+  padding: 5px;
+}
+
+#buttons {
+  grid-column: 2;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.thumb-up {
+  color: #4CAF50;
+}
+
+.thumb-down {
+  margin-left: 10px;
+  color: #F44336;
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+        <title>Bumpr</title>
+        <link rel="stylesheet" type="text/css" href="index.css" />
+        <link rel="stylesheet" href="font-awesome-4.7.0/css/font-awesome.min.css">        
+    </head>
+    <body>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="app.js"></script>
+        
+        <div id="header">       
+            Bumpr status: <span id="status">OK</span><br>        
+            Your plate number: <span id="me"></span>    
+        </div>
+        
+        <div id="myPlateNumberForm">
+            What is your own license plate number?<br>
+            <input id="myPlateNumber" type="text" placeholder="Enter license plate number">
+            <button id="save">Save</button>
+        </div>
+        
+        <div id="main">
+            <input id="plateNumber" type="text" placeholder="License plate number"><br>
+            <div id="buttons">
+                <a id="like"><i class="fa fa-thumbs-up fa-5x thumb-up" aria-hidden="true"></i></a>
+                <a id="dislike"><i class="fa fa-thumbs-down fa-5x thumb-down" aria-hidden="true"></i></a>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            app.initialize();
+        </script>        
+    </body>
+</html>
