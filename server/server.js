@@ -3,6 +3,7 @@ var mysql = require('mysql');
 var bodyParser = require('body-parser');
 var routes = require('./routes.js');
 var app = express();
+var port = 3000;
 
 var Server = {
 	connectDb: function() {
@@ -18,7 +19,7 @@ var Server = {
 			
 			pool.getConnection((err, connection) => {
 				if (err) {
-					console.log('MYSQL CONNECTION ERROR:', err);
+					console.error('MYSQL CONNECTION ERROR:', err);
 					reject(err);
 				} else {
 					resolve(connection);
@@ -46,8 +47,8 @@ var Server = {
 				.then(db => {
 					this.configureExpress(db);
 					
-					app.listen(3000, function () {
-						console.log('Bumpr server running on port 3000.');
+					app.listen(port, function () {
+						console.log(`Bumpr server running on port ${port}.`);
 					});
 				})
 				.catch(err => {

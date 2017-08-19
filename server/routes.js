@@ -39,10 +39,10 @@ module.exports = function (router, db) {
 		var country = req.params.country.toUpperCase();
 		var license = req.params.license.toUpperCase();
 		var values = [country, license];
-		query(res, sql, values, rows => {
+		query(res, sql, values, (res, rows) => {
 			var score = (rows[0] || {}).score || 0;
 			sql = 'SELECT country, license, SUM(score) AS score FROM points GROUP BY country, license ORDER BY score DESC';
-			query(res, sql, values, rows => {
+			query(res, sql, values, (res, rows) => {
 				var rank = _.findIndex(rows, {country, license}) + 1;
 				send(res, {score, rank});
 			});
