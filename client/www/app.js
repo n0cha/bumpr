@@ -1,18 +1,18 @@
 var app = {
   initialize: function() {
     document.addEventListener('deviceready', this.onDeviceReady, false);
+  },
 
-    const myPlateNumber = window.localStorage.getItem("myPlateNumber");
-    if (myPlateNumber && myPlateNumber.length > 0 ) {
-      setMyPlateInHeader(myPlateNumber);
+  onDeviceReady: function() {
+    const hash = window.localStorage.getItem("hash");
+    if (hash && hash.length === 32) {
+      setMyPlateInHeader(window.localStorage.getItem("myPlateNumber"));
       hide('myPlateNumberForm');
     } else {
       show('myPlateNumberForm');
       hide('main');
     }
-  },
 
-  onDeviceReady: function() {
     document.getElementById('like').onclick = function() {
       const error = validateInput();
       if (!error) thumbsUp();
