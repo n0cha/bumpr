@@ -7,7 +7,6 @@
 	"dependencies": {
 		"express": "latest",
 		"mysql": "latest",
-		"body-parser": "latest",
-		"MD5": "latest"
+		"body-parser": "latest"
 	}
 }
