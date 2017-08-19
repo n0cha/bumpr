@@ -1,4 +1,6 @@
 const apiUrl = 'http://phondr.com:3000/api/';
+const myCountry = 'NL';
+var myLicense = window.localStorage.getItem('myPlateNumber').toLocaleUpperCase();
 
 var app = {
   initialize: function() {
@@ -9,25 +11,31 @@ var app = {
     StatusBar.overlaysWebView(false);
     StatusBar.backgroundColorByName("lightGray");
     StatusBar.styleDefault();
-    
+    loadMain();
+  },
+};
+
+function loadMain() {
+  $('#content').load('main.html', () => {
     const hash = window.localStorage.getItem("hash");
     if (hash && hash.length === 31) {
       hide('myPlateNumberForm');
-      setMyPlateInHeader(window.localStorage.getItem("myPlateNumber"));
+      setMyPlateInHeader(myLicense);
       retrieveAndSetScore();
     } else {
       show('myPlateNumberForm');
       hide('main');
     }
-
+    
     document.getElementById('like').onclick = thumbsUpButtonOnclick;
     document.getElementById('dislike').onclick = thumbsDownButtonOnclick;
-    document.getElementById('save').onclick = saveMyPlateNumber; 
-  },
-};
+    document.getElementById('save').onclick = saveMyPlateNumber;
+    $('#rankingButton').on('click', showRanking);
+  });
+}
 
 function retrieveAndSetScore() {
-  const path = apiUrl + 'score/' + 'NL/' + window.localStorage.getItem('myPlateNumber');
+  const path = apiUrl + 'score/' + 'NL/' + myLicense;
   fetch(path).then(function(response) {
     response.json().then(function(json) {
       const score = calculateScore(json.result.score);
@@ -45,7 +53,7 @@ function retrieveAndSetScore() {
 }
 
 function calculateScore(score) {
-  return Math.floor(score * 100);
+  return Math.round(score * 100);
 }
 
 function thumbsUpButtonOnclick() {
@@ -79,7 +87,7 @@ function sendThumb(type) {
           setStatus(json.message);
           retrieveAndSetScore();          
         }
-      })
+      });
       license.value = '';
     }, function(error) {
       setStatus(error.message);
@@ -93,9 +101,10 @@ function sendThumb(type) {
 function saveMyPlateNumber() {
   const data = getMyPlateNumber();
   if (!data.error) {
-    window.localStorage.setItem("myPlateNumber", data.plate);
+    myLicense = data.plate.toLocaleUpperCase();
+    window.localStorage.setItem("myPlateNumber", myLicense);
     window.localStorage.setItem("hash", generateHash());
-    setMyPlateInHeader(data.plate);
+    setMyPlateInHeader();
     hide('myPlateNumberForm');
     show('main');
     retrieveAndSetScore();
@@ -128,8 +137,8 @@ function setStatus(message) {
   document.getElementById('status').innerHTML = message;  
 }
 
-function setMyPlateInHeader(plateNumber) {
-  document.getElementById('me').innerHTML = plateNumber.toUpperCase();
+function setMyPlateInHeader() {
+  document.getElementById('me').innerHTML = myLicense.toUpperCase();
 }
 
 function show(id) {
@@ -144,5 +153,27 @@ function generateHash() {
   return 'xxxxxxxxxxxxxxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
+  });
+}
+
+function showRanking() {
+  $('#content').load('ranking.html', () => {
+    $('#back').on('click', loadMain);
+    fetch(apiUrl + 'top100/')
+        .then(response => {
+          return response.json();
+        })
+        .then(json => {
+          json.result.forEach((row, index) => {
+            $('#top100').append(`
+                <tr${row.country == myCountry && row.license == myLicense ? ' class="self"' : ''}>
+                  <td>${index + 1}</td>
+                  <td>${row.country}</td>
+                  <td>${row.license}</td>
+                  <td>${calculateScore(row.weighted_score)}</td>
+                </tr>
+            `);
+          });
+        });
   });
 }

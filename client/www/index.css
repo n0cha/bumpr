@@ -10,16 +10,25 @@ body {
   src: url(kenteken.ttf);
 }
 
+h1 {
+  display: inline-block;
+  margin: 0;
+  font-size: 30px;
+  vertical-align: middle;
+}
+
 #header {
-  margin-bottom: 40px;
-  margin-left: 0px;
-  margin-right: 0px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
   background-color: #333;
   padding: 8px;
   color: #eee;
   font-size: 25px;
   display:flex;
-  align-items:center;  
+  align-items:center;
+  z-index: 1;
 }
 
 #scores {
@@ -33,17 +42,24 @@ body {
 }
 
 #content {
-	display: grid;	
-  grid-template-columns: auto 80% auto;  
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+#content > * {
+  width: 80%;
 }
 
 #main {
-  grid-column: 2;  
+  margin: 30% auto;
 }
 
 #myPlateNumberForm {
-  grid-column: 2;
   text-align: center;
+  margin: 30% auto;
 }
 
 #save {
@@ -54,6 +70,7 @@ body {
   font-size: 40px;
   padding: 5px;
   width: 100%;
+  box-sizing: border-box;
   text-transform: uppercase;  
   text-align: center;
   font-family: "kenteken";
@@ -61,9 +78,9 @@ body {
   border-radius: 6px;
 }
 ::-webkit-input-placeholder { /* WebKit browsers */
-  font-size: 15px;
+  font-size: 30px;
   text-transform: none;
-  font-family: "Helvetica Neue", Helvetica, sans-serif; 
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
 }
 
 #feedback_buttons {
@@ -87,7 +104,85 @@ body {
 }
 
 #status {
-  position: absolute;
-  bottom:0;
-  margin-left: 10px;
+  position: fixed;
+  bottom: 0;
+  left: 10px;
+}
+
+#buttons {
+  margin: 10% auto;
+}
+
+#buttons > * {
+  margin: 0 auto;
+  display: block;
+  font-size: 30px;
+  font-width: bold;
+  padding: 5px 20px;
+  border-radius: 5px;
+  font-family: kenteken, arial;
+  background: #fff;
+}
+
+#rankingTitle {
+  position: fixed;
+  top: 50px;
+  left: 0;
+  right: 0;
+  background: #ddd;
+  width: 100%;
+}
+
+#back {
+  border: 2px solid black;
+  background: #fff;
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  margin: 3px;
+  vertical-align: middle;
+}
+
+#back:hover {
+  border-color: white;
+  color: white;
+  background: black;
+}
+
+#top100 {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 18px;
+  margin-top: 90px;
+}
+
+#top100 td {
+  padding: 6px 8px;
+}
+
+#top100 td:first-child,
+#top100 td:last-child {
+  text-align: right;
+}
+
+#top100 tr:nth-child(odd) {
+  background-color: white;
+}
+
+#top100 tr:first-child {
+  background: gold;
+}
+
+#top100 tr:first-child td:first-child:before {
+  content: "\f006";
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  margin-right: 10px;
+}
+
+#top100 tr.self {
+  background: lightblue;
 }
