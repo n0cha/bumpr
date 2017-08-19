@@ -11,9 +11,11 @@
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="app.js"></script>
         
-        <div id="header">       
-            Bumpr status: <span id="status">Idle</span><br>        
-            Your plate number: <span id="me"></span>    
+        <div id="header">
+            <img src="icon.png" width="32" align="top">
+            <span id="me"></span>
+            score: <span id="score"></span> 
+            rank: <span id="rank"></span>
         </div>
 
         <div id="content">
@@ -33,7 +35,8 @@
             </div>
 
         </div>
-
+        <span id="status">Idle</span><br>
+        
         <script type="text/javascript">
             app.initialize();
         </script>        

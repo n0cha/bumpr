@@ -1,3 +1,5 @@
+const apiUrl = 'http://phondr.com:3000/api/';
+
 var app = {
   initialize: function() {
     document.addEventListener('deviceready', this.onDeviceReady, false);
@@ -5,52 +7,50 @@ var app = {
 
   onDeviceReady: function() {
     const hash = window.localStorage.getItem("hash");
-    if (hash && hash.length === 32) {
-      setMyPlateInHeader(window.localStorage.getItem("myPlateNumber"));
+    if (hash && hash.length === 31) {
       hide('myPlateNumberForm');
+      setMyPlateInHeader(window.localStorage.getItem("myPlateNumber"));
+      retrieveAndSetScore();
     } else {
       show('myPlateNumberForm');
       hide('main');
     }
 
-    document.getElementById('like').onclick = function() {
-      const error = validateInput();
-      if (!error) thumbsUp();
-      else setStatus(error);
-    };
-    document.getElementById('dislike').onclick = function() {
-      const error = validateInput();
-      if (!error) thumbsDown();
-      else setStatus(error);
-    };
-
+    document.getElementById('like').onclick = thumbsUpButtonOnclick;
+    document.getElementById('dislike').onclick = thumbsDownButtonOnclick;
     document.getElementById('save').onclick = saveMyPlateNumber; 
   },
-
-  fetchData: function() {
-    fetch('http://echo.jsontest.com/key/value/one/two').then(function(response) {
-      response.json().then(function(json) {
-        document.getElementById('status').innerHTML = json.one;
-      });
-    }, function(error) {
-      document.getElementById('status').innerHTML = error.message;
-    });    
-  },
-
 };
 
-function thumbsUp() {
-  sendThumb('up');
+function retrieveAndSetScore() {
+  const path = apiUrl + 'score/' + 'NL/' + window.localStorage.getItem('myPlateNumber');
+  fetch(path).then(function(response) {
+    response.json().then(function(json) {
+      document.getElementById('score').innerHTML = json.result.score;
+      document.getElementById('rank').innerHTML = json.result.rank;
+    });
+  }, function(error) {
+    document.getElementById('status').innerHTML = error.message;
+  }); 
 }
-function thumbsDown() {
-  sendThumb('down');
+
+function thumbsUpButtonOnclick() {
+  const error = validateInput();
+  if (!error) sendThumb('up');
+  else setStatus(error);
+}
+
+function thumbsDownButtonOnclick() {
+  const error = validateInput();
+  if (!error) sendThumb('down');
+  else setStatus(error);
 }
 
 function sendThumb(type) {
   setStatus('Sending data...');
   const license = document.getElementById('plateNumber');
   try {
-    fetch('http://phondr.com:3000/api/thumbs' + type, {
+    fetch(apiUrl + 'thumbs' + type, {
       method: "POST",
       body: JSON.stringify({
         "hash": window.localStorage.getItem('hash'),
@@ -61,7 +61,10 @@ function sendThumb(type) {
     }).then(function(response) {
       response.json().then(function(json) {
         if (json.error) setStatus('Error: ' + json.message)
-        else setStatus(json.message);
+        else {
+          setStatus(json.message);
+          retrieveAndSetScore();          
+        }
       })
       license.value = '';
     }, function(error) {
