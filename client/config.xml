@@ -9,6 +9,7 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
+    <preference name="orientation" value="portrait" />    
     <icon src="icon.png" />
     <platform name="ios">
         <icon height="57" platform="ios" src="icon/ios/Icon-App-57x57@1x.png" width="57" />

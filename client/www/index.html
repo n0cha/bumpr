@@ -15,19 +15,23 @@
             Bumpr status: <span id="status">OK</span><br>        
             Your plate number: <span id="me"></span>    
         </div>
+
+        <div id="content">
         
-        <div id="myPlateNumberForm">
-            What is your own license plate number?<br>
-            <input id="myPlateNumber" type="text" placeholder="Enter license plate number">
-            <button id="save">Save</button>
-        </div>
-        
-        <div id="main">
-            <input id="plateNumber" type="text" placeholder="License plate number"><br>
-            <div id="buttons">
-                <a id="like"><i class="fa fa-thumbs-up fa-5x thumb-up" aria-hidden="true"></i></a>
-                <a id="dislike"><i class="fa fa-thumbs-down fa-5x thumb-down" aria-hidden="true"></i></a>
+            <div id="myPlateNumberForm">
+                What is your license plate number?<br><br>
+                <input id="myPlateNumber" class="plateNumber" type="text" placeholder="Enter license plate number">
+                <br><br><button id="save">Save</button>
             </div>
+            
+            <div id="main">
+                <input id="plateNumber" class="plateNumber" type="text" placeholder="License plate number"><br>
+                <div id="feedback_buttons">
+                    <a id="like"><i class="fa fa-thumbs-up fa-5x thumb-up" aria-hidden="true"></i></a>
+                    <a id="dislike"><i class="fa fa-thumbs-down fa-5x thumb-down" aria-hidden="true"></i></a>
+                </div>
+            </div>
+
         </div>
 
         <script type="text/javascript">
