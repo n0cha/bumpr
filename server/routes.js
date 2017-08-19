@@ -17,7 +17,7 @@ module.exports = function (router, db) {
 	};
 	
 	router.get('/', (req, res) => {
-		res.json({'Message': 'Bumpr REST API'});
+		res.json({message: 'Bumpr REST API'});
 	});
 	
 	var thumbs = function (req, res, upDown) {
@@ -35,14 +35,35 @@ module.exports = function (router, db) {
 	});
 	
 	router.get('/score/:country/:license', function (req, res) {
-		var sql = `SELECT SUM(score) AS score FROM points WHERE country = ? AND license = ?`;
+		var sql = `
+				SELECT SUM(score / count) AS weighted_score FROM points
+					LEFT JOIN (
+						SELECT hash, COUNT(*) AS count FROM points
+						WHERE ts >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+						GROUP BY hash
+					) AS counts
+					ON counts.hash = points.hash
+					WHERE points.ts >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+					AND points.country = ?
+					AND points.license = ?
+		`;
 		var country = req.params.country.toUpperCase();
 		var license = req.params.license.toUpperCase();
-		var values = [country, license];
-		query(res, sql, values, (res, rows) => {
-			var score = (rows[0] || {}).score || 0;
-			sql = 'SELECT country, license, SUM(score) AS score FROM points GROUP BY country, license ORDER BY score DESC';
-			query(res, sql, values, (res, rows) => {
+		query(res, sql, [country, license], (res, rows) => {
+			var score = (rows[0] || {}).weighted_score || 0;
+			sql = `
+				SELECT points.country, points.license, SUM(score / count) AS weighted_score FROM points
+					LEFT JOIN (
+						SELECT hash, COUNT(*) AS count FROM points
+						WHERE ts >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+						GROUP BY hash
+					) AS counts
+					ON counts.hash = points.hash
+					WHERE points.ts >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+					GROUP BY country, license
+					ORDER BY weighted_score DESC
+			`;
+			query(res, sql, [], (res, rows) => {
 				var rank = _.findIndex(rows, {country, license}) + 1;
 				send(res, {score, rank});
 			});
@@ -50,7 +71,6 @@ module.exports = function (router, db) {
 	});
 	
 	var topBottom = function (req, res, isTop) {
-		// var sql = 'SELECT country, license, SUM(score) AS score FROM points GROUP BY country, license ORDER BY score ' + (isTop ? 'DESC' : 'ASC') + ' LIMIT 100';
 		var sql = `
 				SELECT points.country, points.license, SUM(score / count) AS weighted_score FROM points
 					LEFT JOIN (
