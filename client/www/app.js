@@ -26,12 +26,22 @@ function retrieveAndSetScore() {
   const path = apiUrl + 'score/' + 'NL/' + window.localStorage.getItem('myPlateNumber');
   fetch(path).then(function(response) {
     response.json().then(function(json) {
-      document.getElementById('score').innerHTML = json.result.score;
+      const score = calculateScore(json.result.score);
+      let smile = 'fa-meh-o'
+      if (score > 0) smile = 'fa-smile-o';
+      else if (score < 0) smile = 'fa-frown-o';
+      
+      document.getElementById('score').innerHTML = score;
+      document.getElementById('smile').innerHTML = '<i class="fa ' + smile + ' " aria-hidden="true"></i>'
       document.getElementById('rank').innerHTML = json.result.rank;
     });
   }, function(error) {
     document.getElementById('status').innerHTML = error.message;
   }); 
+}
+
+function calculateScore(score) {
+  return Math.floor(score * 100);
 }
 
 function thumbsUpButtonOnclick() {
