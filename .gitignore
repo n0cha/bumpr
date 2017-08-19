@@ -3,3 +3,5 @@
 
 # runTime for PhoneGap
 client/platforms
+
+server/node_modules

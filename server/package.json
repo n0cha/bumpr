@@ -1,0 +1,13 @@
+{
+	"name": "Bumpr-server",
+	"version": "0.0.1",
+	"scripts": {
+		"start": "node server.js"
+	},
+	"dependencies": {
+		"express": "latest",
+		"mysql": "latest",
+		"body-parser": "latest",
+		"MD5": "latest"
+	}
+}
