@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="me.bumpr" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+    <name>Bumpr</name>
+    <description>
+        Bumpr
+    </description>
+    <author email="support@bumpr.me" href="http://bumpr.me">
+        Bumpr Team
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <icon src="icon.png" />
+    <platform name="ios">
+        <icon height="57" platform="ios" src="icon/ios/Icon-App-57x57@1x.png" width="57" />
+        <icon height="114" platform="ios" src="icon/ios/Icon-App-57x57@2x.png" width="114" />
+        <icon height="40" platform="ios" src="icon/ios/Icon-App-40x40@1x.png" width="40" />
+        <icon height="80" platform="ios" src="icon/ios/Icon-App-40x40@2x.png" width="80" />
+        <icon height="50" platform="ios" src="icon/ios/Icon-Small-50x50@1x.png" width="50" />
+        <icon height="100" platform="ios" src="icon/ios/Icon-Small-50x50@2x.png" width="100" />
+        <icon height="60" platform="ios" src="icon/ios/Icon-App-60x60@1x.png" width="60" />
+        <icon height="120" platform="ios" src="icon/ios/Icon-App-60x60@2x.png" width="120" />
+        <icon height="180" platform="ios" src="icon/ios/Icon-App-60x60@3x.png" width="180" />
+        <icon height="72" platform="ios" src="icon/ios/Icon-App-72x72@1x.png" width="72" />
+        <icon height="144" platform="ios" src="icon/ios/Icon-App-72x72@2x.png" width="144" />
+        <icon height="76" platform="ios" src="icon/ios/Icon-App-76x76@1x.png" width="76" />
+        <icon height="152" platform="ios" src="icon/ios/Icon-App-76x76@2x.png" width="152" />
+        <icon height="29" platform="ios" src="icon/ios/Icon-App-29x29@1x.png" width="29" />
+        <icon height="58" platform="ios" src="icon/ios/Icon-App-29x29@2x.png" width="58" />
+        <icon height="87" platform="ios" src="icon/ios/Icon-App-29x29@3x.png" width="87" />
+    </platform>    
+    <platform name="android">
+        <icon src="icon.png" platform="android" qualifier="hdpi" />
+    </platform>    
+</widget>
