@@ -5,12 +5,17 @@ body {
   font-size: 20px;
 }
 
+@font-face {
+  font-family: kenteken;
+  src: url(kenteken.ttf);
+}
+
 #header {
   margin-bottom: 40px;
   margin-left: 0px;
   margin-right: 0px;
   background-color: #333;
-  padding: 5px;
+  padding: 8px;
   color: #eee;
   font-size: 25px;
   display:flex;
@@ -24,6 +29,7 @@ body {
 
 #me {
   margin-left: 10px;
+  font-family: "kenteken";  
 }
 
 #content {
@@ -45,14 +51,19 @@ body {
 }
 
 .plateNumber {
-  font-size: 20px;
+  font-size: 40px;
   padding: 5px;
   width: 100%;
   text-transform: uppercase;  
   text-align: center;
+  font-family: "kenteken";
+  border: 3px solid #777;
+  border-radius: 6px;
 }
 ::-webkit-input-placeholder { /* WebKit browsers */
+  font-size: 15px;
   text-transform: none;
+  font-family: "Helvetica Neue", Helvetica, sans-serif; 
 }
 
 #feedback_buttons {

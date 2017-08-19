@@ -7,6 +7,9 @@ var app = {
 
   onDeviceReady: function() {
     StatusBar.overlaysWebView(false);
+    StatusBar.backgroundColorByName("lightGray");
+    StatusBar.styleDefault();
+    
     const hash = window.localStorage.getItem("hash");
     if (hash && hash.length === 31) {
       hide('myPlateNumberForm');
@@ -95,6 +98,7 @@ function saveMyPlateNumber() {
     setMyPlateInHeader(data.plate);
     hide('myPlateNumberForm');
     show('main');
+    retrieveAndSetScore();
   }
   else setStatus(data.error);
 };
@@ -125,7 +129,7 @@ function setStatus(message) {
 }
 
 function setMyPlateInHeader(plateNumber) {
-  document.getElementById('me').innerHTML = plateNumber;
+  document.getElementById('me').innerHTML = plateNumber.toUpperCase();
 }
 
 function show(id) {
