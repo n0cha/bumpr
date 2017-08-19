@@ -6,6 +6,7 @@ var app = {
   },
 
   onDeviceReady: function() {
+    StatusBar.overlaysWebView(false);
     const hash = window.localStorage.getItem("hash");
     if (hash && hash.length === 31) {
       hide('myPlateNumberForm');

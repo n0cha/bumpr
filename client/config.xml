@@ -9,7 +9,7 @@
     </author>
     <content src="index.html" />
     <access origin="*" />
-    <preference name="orientation" value="portrait" />    
+    <preference name="orientation" value="portrait" />
     <icon src="www/icon.png" />
     <platform name="ios">
         <icon height="57" platform="ios" src="icon/ios/Icon-App-57x57@1x.png" width="57" />
@@ -28,7 +28,7 @@
         <icon height="29" platform="ios" src="icon/ios/Icon-App-29x29@1x.png" width="29" />
         <icon height="58" platform="ios" src="icon/ios/Icon-App-29x29@2x.png" width="58" />
         <icon height="87" platform="ios" src="icon/ios/Icon-App-29x29@3x.png" width="87" />
-    </platform>    
+    </platform>
     <platform name="android">
         <icon density="ldpi" src="icon/android/mipmap-ldpi/ic_launcher.png" />
         <icon density="mdpi" src="icon/android/mipmap-mdpi/ic_launcher.png" />
@@ -36,5 +36,7 @@
         <icon density="xhdpi" src="icon/android/mipmap-xhdpi/ic_launcher.png" />
         <icon density="xxhdpi" src="icon/android/mipmap-xxhdpi/ic_launcher.png" />
         <icon density="xxxhdpi" src="icon/android/mipmap-xxxhdpi/ic_launcher.png" />
-    </platform>    
+    </platform>
+    <plugin name="cordova-plugin-statusbar" spec="~2.2.3" />
+    <preference name="StatusBarOverlaysWebView" value="false" />
 </widget>
