@@ -50,61 +50,76 @@ module.exports = function (router, db) {
 			return res.json({error: true, message: 'Invalid license plate number'});
 		}
 		
-		var sql = `
-				SELECT SUM(score / count) AS weighted_score FROM points
-					LEFT JOIN (
-						SELECT hash, COUNT(*) AS count FROM points
-						WHERE ts >= DATE_SUB(NOW(), INTERVAL 1 DAY)
-						GROUP BY hash
-					) AS counts
-					ON counts.hash = points.hash
-					WHERE points.ts >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
-					AND points.country = ?
-					AND points.license = ?
-		`;
+		// var sql = `
+		// 		SELECT SUM(score / count) AS weighted_score FROM points
+		// 			LEFT JOIN (
+		// 				SELECT hash, COUNT(*) AS count FROM points
+		// 				WHERE ts >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+		// 				GROUP BY hash
+		// 			) AS counts
+		// 			ON counts.hash = points.hash
+		// 			WHERE points.ts >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+		// 			AND points.country = ?
+		// 			AND points.license = ?
+		// `;
 		
-		query(res, sql, [country, license], (res, rows) => {
-			var score = (rows[0] || {}).weighted_score || 0;
-			sql = `
-				SELECT points.country, points.license, SUM(score / count) AS weighted_score FROM points
-					LEFT JOIN (
-						SELECT hash, COUNT(*) AS count FROM points
-						WHERE ts >= DATE_SUB(NOW(), INTERVAL 1 DAY)
-						GROUP BY hash
-					) AS counts
-					ON counts.hash = points.hash
-					WHERE points.ts >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
-					GROUP BY country, license
-					ORDER BY weighted_score DESC
-			`;
-			query(res, sql, [], (res, rows) => {
-				var rank = _.findIndex(rows, {country, license}) + 1;
-				send(res, {score, rank});
-			});
+		var sql = `
+			SELECT points.country, points.license, SUM(score / count) AS score FROM points
+				LEFT JOIN (
+					SELECT hash, COUNT(*) AS count FROM points
+					WHERE ts >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+					GROUP BY hash
+				) AS counts
+				ON counts.hash = points.hash
+				WHERE points.ts >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+				GROUP BY country, license
+				ORDER BY score DESC
+		`;
+		query(res, sql, [], (res, rows) => {
+			var index = _.findIndex(rows, {country, license});
+			var score = (rows[index] || {}).score || 0;
+			var rank = index + 1;
+			send(res, {score, rank});
 		});
 	});
 	
-	var topBottom = function (req, res, isTop) {
+	var topBottom = function (req, res, bottom, limit) {
+		var startRank = 0;
+		if (bottom) {
+			startRank = '(SELECT COUNT(*) FROM (SELECT DISTINCT country, license FROM points) l) + 1';
+		}
+		
 		var sql = `
-				SELECT points.country, points.license, SUM(score / count) AS weighted_score FROM points
-					LEFT JOIN (
-						SELECT hash, COUNT(*) AS count FROM points
-						WHERE ts >= DATE_SUB(NOW(), INTERVAL 1 DAY)
-						GROUP BY hash
-					) AS counts
-					ON counts.hash = points.hash
-					WHERE points.ts >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
-					GROUP BY country, license
-					ORDER BY weighted_score ${isTop ? 'DESC' : 'ASC'} LIMIT 100
+				SELECT p.country, p.license, p.score, @rownum := @rownum ${bottom ? '-' : '+'} 1 AS rank
+					FROM (SELECT @rownum := ${startRank}) r, 
+						(SELECT points.country, points.license, SUM(score / count) AS score
+							FROM points
+							LEFT JOIN (
+								SELECT hash, COUNT(*) AS count FROM points
+								WHERE ts >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+								GROUP BY hash
+							) AS counts
+							ON counts.hash = points.hash
+							WHERE points.ts >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+							GROUP BY country, license
+							ORDER BY score ${bottom ? 'ASC' : 'DESC'} LIMIT ${limit}) p		
 		`;
 		query(res, sql, [], send);
 	};
 	
 	router.get('/top100', (req, res) => {
-		topBottom(req, res, true);
+		topBottom(req, res, false, 100);
 	});
 	
 	router.get('/bottom100', (req, res) => {
-		topBottom(req, res, false);
+		topBottom(req, res, true, 100);
+	});
+	
+	router.get('/top10', (req, res) => {
+		topBottom(req, res, false, 10);
+	});
+	
+	router.get('/bottom10', (req, res) => {
+		topBottom(req, res, true, 10);
 	});
 };

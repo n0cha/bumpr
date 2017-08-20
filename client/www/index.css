@@ -146,6 +146,7 @@ h1 {
   border-radius: 4px;
   margin: 3px;
   vertical-align: middle;
+  padding: 0;
 }
 
 #back:hover {
@@ -154,7 +155,7 @@ h1 {
   background: black;
 }
 
-#top100 {
+#rankingTable {
   width: 100%;
   border-collapse: collapse;
   border-spacing: 0;
@@ -162,34 +163,78 @@ h1 {
   margin-top: 90px;
 }
 
-#top100 td {
-  padding: 6px 8px;
-}
-
-#top100 td:first-child,
-#top100 td:last-child {
+#rankingTable td {
+  padding: 2px 8px;
   text-align: right;
 }
 
-#top100 tr:nth-child(odd) {
-  background-color: white;
+#rankingTable td:nth-child(3) {
+  text-align: center;
 }
 
-#top100 tr:first-child {
+.licensePlate {
+  font-family: kenteken, arial;
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid black;
+  background: white;
+  border-radius: 4px;
+  text-align: left;
+  padding: 2px 5px;
+  color: black;
+  display: inline-block;
+}
+
+.licensePlate > span:nth-child(2) {
+  margin: 0 3px;
+}
+
+#rankingTable tr {
+  background-color: #ffd;
+  border-bottom: 1px dashed #ccc;
+  color: #333;
+}
+
+#rankingTable tr:first-child {
   background: gold;
+  font-weight: bold;
 }
 
-#top100 tr:first-child td:first-child:before {
+/*#rankingTable tr:first-child td:first-child:before {
   content: "\f006";
   font: normal normal normal 14px/1 FontAwesome;
   font-size: inherit;
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
   margin-right: 10px;
+}*/
+
+#rankingTable tr:last-child {
+  background: indianred;
+  font-weight: bold;
 }
 
-#top100 tr.self {
+/*#rankingTable tr:last-child td:first-child:before {
+  content: "\f119";
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  margin-right: 10px;
+}*/
+
+#rankingTable tr.self {
   background: lightblue;
+  font-weight: bold;
+}
+
+#rankingTable .spacer {
+  background: white !important;
+  color: #999;
+}
+
+#rankingTable .spacer td {
+  padding: 2px 11px 0 0;
 }
 
 #error {

@@ -1,6 +1,8 @@
 const apiUrl = 'http://phondr.com:3141/api/';
 const myCountry = 'NL';
 var myLicense = getMyPlateNumberFromStorage();
+var myScore = 0;
+var myRank = 0;
 
 var app = {
   initialize: function() {
@@ -40,21 +42,21 @@ function preventNonAlphaNumericCharacters(e) {
   if (!regex.test(key)) {
      event.preventDefault();
      return false
-  };
-};
+  }
+}
 
 function retrieveAndSetScore() {
   const path = apiUrl + 'score/' + 'NL/' + myLicense;
   fetch(path).then(function(response) {
     response.json().then(function(json) {
-      const score = calculateScore(json.result.score);
-      let smile = 'fa-meh-o'
-      if (score > 0) smile = 'fa-smile-o';
-      else if (score < 0) smile = 'fa-frown-o';
+      myScore = json.result.score;
+      myRank = json.result.rank;
       
-      document.getElementById('score').innerHTML = score;
-      document.getElementById('smile').innerHTML = '<i class="fa ' + smile + ' " aria-hidden="true"></i>'
-      document.getElementById('rank').innerHTML = json.result.rank;
+      const smile = myScore > 0 ? 'smile' : myScore < 0 ? 'frown' : 'meh';
+      
+      document.getElementById('score').innerHTML = String(calculateScore(myScore));
+      document.getElementById('smile').innerHTML = `<i class="fa fa-${smile}-o" aria-hidden="true"></i>`;
+      document.getElementById('rank').innerHTML = String(myRank);
     });
   }, function(error) {
     showError(error.message);
@@ -94,7 +96,7 @@ function sendThumb(type) {
     headers: { "Content-Type": "application/json" }
   }).then(function(response) {
     response.json().then(function(json) {
-      if (json.error) showError(`Error: ${json.message}`)
+      if (json.error) showError(`Error: ${json.message}`);
       else {
         setMessage('Thanks for the feedback!');
         retrieveAndSetScore();          
@@ -117,8 +119,8 @@ function saveMyPlateNumber() {
     show('main');
     retrieveAndSetScore();
   }
-  else setMessage(data.error);
-};
+  else setStatus(data.error);
+}
 
 function validateInput() {
   let error = false;
@@ -161,7 +163,7 @@ function showError(message) {
 
   closeBtn.on('click', function() {
     errorView.remove();
-  })
+  });
 
   $('body').append(errorView);  
 }
@@ -190,23 +192,70 @@ function generateHash() {
 }
 
 function showRanking() {
-  $('#content').load('ranking.html', () => {
-    $('#back').on('click', loadMain);
-    fetch(apiUrl + 'top100/')
-        .then(response => {
-          return response.json();
-        })
-        .then(json => {
-          json.result.forEach((row, index) => {
-            $('#top100').append(`
-                <tr${row.country == myCountry && row.license == myLicense ? ' class="self"' : ''}>
-                  <td>${index + 1}</td>
-                  <td>${row.country}</td>
-                  <td>${row.license}</td>
-                  <td>${calculateScore(row.weighted_score)}</td>
-                </tr>
-            `);
-          });
+  Promise.all([
+      new Promise((resolve) => {
+        $('#content').load('ranking.html', () => {
+          resolve();
         });
-  });
+      }),
+      fetch(apiUrl + 'top10/'),
+      fetch(apiUrl + 'bottom10/')
+  ])
+      .then(responses => {
+        $('#back').on('click', loadMain);
+
+        return Promise.all([
+          responses[1].json(),
+          responses[2].json()
+        ]);
+      })
+      .then(data => {
+        const top10 = data[0].result;
+        const bottom10 = data[1].result;
+        const maxRank = bottom10[0].rank;
+        
+        var createRow = (row, type) => {
+          let icon = '';
+          if (row.rank === 1) {
+            icon = '<i class="fa fa-smile-o" aria-hidden="true"></i>';
+          } else if (row.rank === maxRank) {
+            icon = '<i class="fa fa-frown-o" aria-hidden="true"></i>';
+          }
+          
+          return `
+              <tr class="${type}">
+                <td>${icon}</td>
+                <td>${row.rank}</td>
+                <td><div class="licensePlate">
+                  <span>${row.country}</span><span>&#8226;</span><span>${row.license}</span>
+                </div></td>
+                <td>${calculateScore(row.score)}</td>
+              </tr>
+          `;
+        };
+        
+        var createSpacer = () => {
+          return '<tr class="spacer"><td></td><td><i class="fa fa-ellipsis-v" aria-hidden="true"></i><td></td><td></td></tr>';
+        };
+        
+        top10.forEach((row) => {
+          if (row.rank < myRank) {
+            $('#rankingTable').append(createRow(row, 'top'));
+          }
+        });
+
+        if (myRank > 10) {
+          $('#rankingTable').append(createSpacer());
+        }
+        $('#rankingTable').append(createRow({country: myCountry, license: myLicense, score: myScore, rank: myRank}, 'self'));
+        if (myRank < maxRank - 9) {
+          $('#rankingTable').append(createSpacer());
+        }
+
+        bottom10.reverse().forEach((row) => {
+          if (row.rank > myRank) {
+            $('#rankingTable').append(createRow(row, 'bottom'));
+          }
+        });
+      });
 }
