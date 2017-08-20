@@ -3,12 +3,18 @@ var myCountry = window.localStorage.getItem('myCountry') || 'NL';
 var myLicense = getMyPlateNumberFromStorage();
 var myScore = 0;
 var myRank = 0;
+let selectedCountry = myCountry;
+
+let countries;
+$.getJSON('static/countries.json', c => {
+  countries = c;
+});
 
 var app = {
   initialize: function() {
     document.addEventListener('deviceready', this.onDeviceReady, false);
   },
-
+  
   onDeviceReady: function() {
     StatusBar.overlaysWebView(false);
     StatusBar.styleDefault();
@@ -18,58 +24,53 @@ var app = {
 
 function loadMain() {
   $('#content').load('main.html', () => {
-    $('#myPlateNumberForm').hide();
-    $('#main').hide();
-    $('#buttons').hide();
-    const hash = window.localStorage.getItem("hash");
-    if (hash && hash.length === 31) {
-      // Main screen
-      populateCountrySelect('#selectCountry', { code: myCountry , name: ''});
-      $('#loader').hide();      
-      $('#main').show();
-      $('#buttons').show();
+    const key = window.localStorage.getItem('key');
+    if (!key || key.length !== 32) {
+      $('.main').hide();
+      
+      getCountry(country => {
+        if (country.error) {
+          return showError(country.error);
+        }
+        
+        selectedCountry = country;
+        populateCountrySelect();
+        $('#loader').hide();
+      });
+    } else {
+      $('.setup').hide();
+      $('#loader').hide();
       setMyPlateInHeader(myLicense);
       retrieveAndSetScore();
-    } else {
-      // Get user info screen
-      getCountry(function(country) {
-        if (!country.error) {
-          populateCountrySelect('#myCountry', country);
-          $('#loader').hide();
-          $('#myPlateNumberForm').show();
-        }
-        else showError(country.error);
-      });      
     }
     
-    $('input').keypress(preventNonAlphaNumericCharacters);
+    populateCountrySelect();
     $('#like').on('click', thumbsUpButtonOnclick);
     $('#dislike').on('click', thumbsDownButtonOnclick);
     $('#save').on('click', saveMySettings);
     $('#rankingButton').on('click', event => showRanking());
-    $('#changeCountry').click(() => $('#selectCountry').trigger('focus'));
+    $('#plateNumber').html(createLicensePlate(selectedCountry, '', true, true));
+    $('#selectCountry').on('change', event => {
+      selectedCountry = $(event.target).val();
+      $('#plateNumber').html(createLicensePlate(selectedCountry, '', true, true));
+      $('#searchInput').html(createLicensePlate(selectedCountry, '', true));
+    });
+    $('input').on('keypress', preventNonAlphaNumericCharacters);
   });
 }
 
-function populateCountrySelect(locator, country) {
-  $.getJSON('countries.json', function(data) {
-    $.each(data, function(key, val) {
-      $(locator).append($('<option/>').attr("value", key).text(`${val} (${key})`));
-      if (key === country.code || val === country.name) {
-        // Need to check both code and name, because not all license plate codes match
-        // For example Belgium is country BE and license B. Matches on Belgium instead
-        $(`${locator} option[value='${key}']`).prop('selected', true);
-      }
-    })
+function populateCountrySelect() {
+  _(countries).map((country, key) => Object.assign(country, {key})).sortBy('name').each(country => {
+    const isSelected = (country.key === selectedCountry);
+    $('#selectCountry').append(`<option value="${country.key}" ${isSelected ? 'selected' : ''}>${country.name} (${country.key})</option>`);
   });
 }
 
-function preventNonAlphaNumericCharacters(e) {
-  var regex = new RegExp("^[a-zA-Z0-9]$");
-  var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
-  if (!regex.test(key)) {
-     event.preventDefault();
-     return false
+function preventNonAlphaNumericCharacters(event) {
+  var key = String.fromCharCode(event.charCode || event.which);
+  if (!/^[a-zA-Z0-9]$/.test(key)) {
+    event.preventDefault();
+    return false
   }
 }
 
@@ -88,7 +89,7 @@ function retrieveAndSetScore() {
     });
   }, function(error) {
     showError(error.message);
-  }); 
+  });
 }
 
 function calculateScore(score) {
@@ -97,75 +98,73 @@ function calculateScore(score) {
 
 function thumbsUpButtonOnclick() {
   const validatationError = validateInput();
-  if (!validatationError) sendThumb('up');
+  if (!validatationError) sendThumb(true);
   else setMessage(validatationError);
 }
 
 function thumbsDownButtonOnclick() {
   const validatationError = validateInput();
-  if (!validatationError) sendThumb('down');
+  if (!validatationError) sendThumb(false);
   else setMessage(validatationError);
 }
 
-function sendThumb(type) {
-  const license = document.getElementById('plateNumber');
-  if (license.value.toLocaleUpperCase() === myLicense) {
+function sendThumb(isUp) {
+  const license = $('#plateNumber input').val();
+  if (license.toLocaleUpperCase() === myLicense && selectedCountry === myCountry) {
     setMessage('Personal feedback?!?');
     return;
   }
-
-  const country = $('#selectCountry').val();
-  if (isValidCountryLenght(country)) {
+  
+  if (isValidCountryLenght(selectedCountry)) {
     showError('No country selected, is this possible?');
     return;
   }
-
-  fetch(`${apiUrl}thumbs${type}`, {
-    method: "POST",
-    body: JSON.stringify({
-      "hash": window.localStorage.getItem('hash'),
-      "country": country,
-      "license": license.value
-    }),
-    headers: { "Content-Type": "application/json" }
-  }).then(function(response) {
-    response.json().then(function(json) {
-      if (json.error) showError(`Error: ${json.message}`);
-      else {
-        setMessage('Thanks for the feedback!');
-        retrieveAndSetScore();          
-      }
+  
+  getLocation(location => {
+    fetch(`${apiUrl}thumbs${isUp ? 'up' : 'down'}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        hash: window.localStorage.getItem('key'),
+        country: selectedCountry,
+        license: license,
+        location: {
+          lat: location.latitude,
+          lng: location.longitude
+        }
+      }),
+      headers: {'Content-Type': 'application/json'}
+    }).then(function(response) {
+      response.json().then(function(json) {
+        if (json.error) {
+          showError(`Error: ${json.message}`);
+        } else {
+          (new Audio(`static/chime_${isUp ? 'done' : 'dim'}.wav`)).play();
+          setMessage('Thanks for the feedback!');
+          retrieveAndSetScore();
+        }
+      });
+      $('#plateNumber input').val('');
+    }, function(error) {
+      showError(error.message);
     });
-    license.value = '';
-  }, function(error) {
-    showError(error.message);
   });
 }
 
 function saveMySettings() {
-  const license = $('#myPlateNumber').val();
+  const license = $('#plateNumber input').val();
+  
   if (license.length < 1 || license.length > 9) {
-    setMessage('Type a license');
-    return;
+    return setMessage('Type a license');
   }
-
-  const country = $('#myCountry').val();
-  if (isValidCountryLenght(country)) {
-    setMessage('Select a country');
-    return
-  }
-
+  
+  myCountry = selectedCountry;
   myLicense = license.toLocaleUpperCase();
-  myCountry = country;
-  window.localStorage.setItem("myPlateNumber", myLicense);
-  window.localStorage.setItem("myCountry", country);
-  window.localStorage.setItem("hash", generateHash());
-  setMyPlateInHeader();
-  populateCountrySelect('#selectCountry', { code: myCountry , name: ''});  
-  $('#myPlateNumberForm').hide();
-  $('#main').show();
-  $('#buttons').show();    
-  retrieveAndSetScore();
+  
+  window.localStorage.setItem('myPlateNumber', myLicense);
+  window.localStorage.setItem('myCountry', myCountry);
+  window.localStorage.setItem('key', generateKey());
+  
+  loadMain();
 }
 
 function isValidCountryLenght(country) {
@@ -174,9 +173,9 @@ function isValidCountryLenght(country) {
 
 function validateInput() {
   let error = false;
-  const plateNumber = document.getElementById('plateNumber').value;
+  const plateNumber = $('#plateNumber input').val();
   if (plateNumber.length <= 0) {
-    error = 'Missing platenumber';
+    error = 'Missing plate number';
   }
   return error;
 }
@@ -193,31 +192,30 @@ function showError(message) {
   let icon = $('<i/>').attr("id", "errorIcon").attr('aria-hidden', true).addClass('fa fa-exclamation-triangle fa-3x');
   let closeBtn = $('<i/>').attr("id", "errorClose").attr('aria-hidden', true).addClass('fa fa-times fa-3x');
   let messageSpan = $('<div/>').attr("id", "errorMessage").text(`Error: ${message}`);
-
+  
   errorView.append(icon);
   errorView.append(text);
   errorView.append(messageSpan);
   errorView.append(closeBtn);
-
+  
   closeBtn.on('click', function() {
     errorView.remove();
   });
-
-  $('body').append(errorView);  
+  
+  $('body').append(errorView);
 }
 
 function setMessage(message) {
-  document.getElementById('message').innerHTML = message;  
+  document.getElementById('message').innerHTML = message;
 }
 
 function setMyPlateInHeader() {
-  document.getElementById('me').innerHTML = myLicense.toUpperCase();
+  $('#me').html(createLicensePlate(myCountry, myLicense));
 }
 
-function generateHash() {
-  return 'xxxxxxxxxxxxxxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
+function generateKey() {
+  return 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'.replace(/x/g, () => {
+    return (Math.random() * 16 | 0).toString(16);
   });
 }
 
@@ -242,9 +240,7 @@ function drawRankingTable(top10, bottom10, searchData) {
               <tr class="${type}">
                 <td>${icon}</td>
                 <td>${row.rank}</td>
-                <td><div class="licensePlate">
-                  <span>${row.country}</span><span>&#8226;</span><span>${row.license}</span>
-                </div></td>
+                <td>${createLicensePlate(row.country, row.license)}</td>
                 <td>${calculateScore(row.score)}</td>
               </tr>
           `;
@@ -296,9 +292,7 @@ function drawRankingTable(top10, bottom10, searchData) {
   }
   
   bottom10.reverse().forEach((row) => {
-    if (row.rank > myRank) {
-      $('#rankingTable').append(createRow(row, 'bottom'));
-    }
+    $('#rankingTable').append(createRow(row, 'bottom'));
   });
   
   // if (searchData) {
@@ -318,22 +312,23 @@ function showRanking(search) {
   ];
   
   if (search) {
-    requests.push(fetch(`${apiUrl}score/${myCountry}/${search}`));
+    requests.push(fetch(`${apiUrl}score/${selectedCountry}/${search}`));
   }
   
   Promise.all(requests)
       .then(responses => {
         $('#back').on('click', loadMain);
         $('#searchButton').on('click', () => {
-          const $searchInput = $('#searchInput');
-          $searchInput.toggleClass('_hidden');
-          $searchInput.children('input').focus();
+          $('#searchInput').toggleClass('_hidden');
+          $('#searchInput input').focus();
+          $('#rankingTitle h1').toggleClass('_hidden');
         });
-        $('#searchInput').children('input').on('keypress', event => {
+        $('#searchInput').html(createLicensePlate(selectedCountry, '', true));
+        $('#searchInput input').on('keypress', event => {
           if (event.keyCode === 13) {
-            const $searchInput = $('#searchInput');
-            $searchInput.addClass('_hidden');
-            showRanking($searchInput.children('input').val());
+            $('#searchInput').addClass('_hidden');
+            $('#rankingTitle h1').removeClass('_hidden');
+            showRanking($('#searchInput input').val());
           }
         });
         
@@ -345,16 +340,16 @@ function showRanking(search) {
         if (search) {
           responseData.push(responses[3].json());
         }
-
+        
         return Promise.all(responseData);
       })
       .then(data => {
         drawRankingTable(data[0].result, data[1].result, search && {
-          country: myCountry.toLocaleUpperCase(),
-          license: search.toLocaleUpperCase(),
-          score: data[2].result.score,
-          rank: data[2].result.rank
-        });
+              country: selectedCountry.toLocaleUpperCase(),
+              license: search.toLocaleUpperCase(),
+              score: data[2].result.score,
+              rank: data[2].result.rank
+            });
       });
 }
 
@@ -364,10 +359,21 @@ function getCountry(callback) {
       fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.latitude},${location.longitude}&key=AIzaSyDVqRsZXDOS1MC9BGjd_JbZXkFk1b5rOoM`).then(function(response) {
         response.json().then(function(json) {
           json.results[0].address_components.forEach(function(item) {
-            if (item.types[0] === "country") callback({
-              code: item.short_name.toLocaleUpperCase(),
-              name: item.long_name
-            });
+            if (item.types[0] === 'country') {
+              let country = item.short_name;
+              
+              // Need to check both code and name, because not all license plate codes match
+              // For example Belgium is country BE and license B. Matches on Belgium instead
+              if (!countries[country]) {
+                country = _.findKey(countries, {name: item.long_name});
+              }
+              
+              if (!country) {
+                return callback({error: 'getCountry error: no match found'});
+              }
+              
+              callback(country);
+            }
           })
         });
       }, function(error) {
@@ -379,7 +385,7 @@ function getCountry(callback) {
       callback({
         error: `getLocation error: ${location.error}`
       })
-    };
+    }
   });
 }
 
@@ -391,7 +397,7 @@ function getLocation(callback) {
         longitude: result.coords.longitude,
         error: false
       })
-    }, function(error) {
+    }, function (error) {
       callback({
         error: error.code
       })
@@ -400,5 +406,38 @@ function getLocation(callback) {
     callback({
       error: 'nav.geo missing'
     })
-  }      
+  }
+}
+
+function createLicensePlate(country, license, isInput, isLarge) {
+  const countryData = countries[country];
+  let style = '';
+  let inputStyle = '';
+  const shadowWidth = isLarge ? 2 : 1;
+  
+  if (countryData && countryData.fg && countryData.bg) {
+    style = `background:${countryData.bg};color:${countryData.fg};box-shadow: 0 0 0 ${shadowWidth}px ${countryData.bg};border-color:${countryData.fg}`;
+    inputStyle = `color:${countryData.fg};`;
+  }
+  
+  const licensePart = isInput ?
+      `<input maxlength="9" placeholder="A1234BC" style="${inputStyle}">${license}</input>` :
+      `<span>${license}</span>`;
+  
+  return `
+      <div class="licensePlate${isInput ? ' _input' : ''}${isLarge ? ' _large' : ''}" style="${style}">
+        <span>${country}</span>${licensePart}
+        ${isInput ? `<div class="clickBox" onclick="openSelect($('#selectCountry'))"></div>` : ''}
+      </div>
+  `;
+}
+
+function openSelect($select) {
+  if (document.createEvent) {
+    var e = document.createEvent('MouseEvents');
+    e.initMouseEvent('mousedown', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    $select[0].dispatchEvent(e);
+  } else if (element.fireEvent) {
+    $select[0].fireEvent('onmousedown');
+  }
 }

@@ -1,23 +1,16 @@
-
-
-<div id="myPlateNumberForm">
-	What is your license plate?<br><br>
-	<input id="myPlateNumber" class="plateNumber" type="text" placeholder="Enter license plate" maxlength="9">
-	<select id="myCountry"><option>Select country</option></select>
-	<button id="save">SAVE</button>
-</div>
-
 <div id="main">
-	<span id="changeCountry">change country</span><select id="selectCountry"></select>	
-	<input id="plateNumber" class="plateNumber" type="text" placeholder="Enter license plate" maxlength="9">
-	<div id="feedback_buttons">
-		<a id="like"><i class="fa fa-thumbs-up fa-5x thumb-up" aria-hidden="true"></i></a>
-		<a id="dislike"><i class="fa fa-thumbs-down fa-5x thumb-down" aria-hidden="true"></i></a>
+	<div id="setupTitle" class="setup">What's your license plate number?</div>
+	<div id="plateNumber"></div>
+	<div id="feedback_buttons" class="main">
+		<button id="like"><img src="static/thumbsup.png"></button>
+		<button id="dislike"><img src="static/thumbsdown.png"></button>
 	</div>
+	<!--<audio src="static/chime_done.wav" preload></audio>-->
 </div>
 
 <div id="message"></div>
 
 <div id="buttons">
-	<button id="rankingButton">RANKING</button>
+	<button id="save" class="setup">SAVE</button>
+	<button id="rankingButton" class="main">RANKING</button>
 </div>

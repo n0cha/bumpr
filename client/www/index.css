@@ -1,6 +1,6 @@
 body {
   margin: 0px;
-  font-family: "Helvetica Neue", Helvetica, sans-serif;  
+  font-family: "Helvetica Neue", "Trebuchet MS", sans-serif;
   background-color: #ddd;
   font-size: 20px;
 }
@@ -29,6 +29,7 @@ h1 {
   display:flex;
   align-items:center;
   z-index: 1;
+  height: 32px;
 }
 
 #scores {
@@ -37,8 +38,8 @@ h1 {
 }
 
 #me {
-  margin-left: 10px;
-  font-family: "kenteken";  
+  margin-left: 6px;
+  font-size: 20px;
 }
 
 #content {
@@ -47,10 +48,6 @@ h1 {
   right: 0;
   top: 0;
   bottom: 0;
-}
-
-#content > * {
-  width: 80%;
 }
 
 #main {
@@ -63,9 +60,15 @@ h1 {
   text-align: center;
 }
 
-#myPlateNumberForm {
+#setupTitle {
+  margin: 0 auto 30px;
+  width: 80%;
   text-align: center;
-  margin: 30% auto 10% auto;
+  font-size: 24px;
+}
+
+#plateNumber {
+  text-align: center;
 }
 
 .plateNumber {
@@ -92,33 +95,51 @@ h1 {
   text-align: center;
 }
 
+#feedback_buttons > button {
+  width: 120px;
+  height: 120px;
+  border: 4px solid black;
+  border-radius: 8px;
+  margin: 12px 7px;
+}
+
+#feedback_buttons > button > img {
+  width: 100px;
+  height: 100px;
+}
+
+#like {
+  /*background: url(static/thumbsup.png);*/
+  background: yellowgreen;
+}
+
 #dislike {
-  position: relative;
-  top: 25px;
-}
-
-.thumb-up {
-  color: #4CAF50;
-}
-
-.thumb-down {
-  margin-left: 10px;
-  color: #F44336;
+  /*background: url(static/thumbsdown.png);*/
+  background: indianred;
 }
 
 #buttons {
   margin: 20% auto;
 }
 
-#buttons > * {
+#buttons > button {
   margin: 0 auto;
   display: block;
   font-size: 30px;
-  padding: 5px 20px;
+  font-weight: bold;
+  padding: 0 10px;
   border-radius: 5px;
   font-family: kenteken, arial;
   background: #fff;
+  border: 3px solid black;
 }
+
+#buttons > button:hover {
+  background: #333;
+  border-color: #eee;
+  color: #eee;
+}
+
 
 #save {
   margin: 10% auto;
@@ -127,7 +148,7 @@ h1 {
   padding: 5px 20px;
   border-radius: 5px;
   font-family: kenteken, arial;
-  background: #fff;  
+  background: #fff;
 }
 
 #rankingTitle {
@@ -137,6 +158,15 @@ h1 {
   right: 0;
   background: #ddd;
   width: 100%;
+  z-index: 1;
+}
+
+#rankingTitle h1 {
+  transition: all 0.25s ease-in-out;
+}
+
+#rankingTitle h1._hidden {
+  opacity: 0;
 }
 
 .iconButton {
@@ -151,9 +181,9 @@ h1 {
 }
 
 .iconButton:hover {
-  border-color: white;
-  color: white;
-  background: black;
+  background: #333;
+  border-color: #eee;
+  color: #eee;
 }
 
 #rankingTable {
@@ -170,13 +200,14 @@ h1 {
 }
 
 #searchInput {
-  right: 40px;
+  right: 42px;
   position: absolute;
   top: 4px;
   background: inherit;
-  width: 175px;
-  transition: all 0.5s ease-in-out;
+  width: 190px;
+  transition: all 0.25s ease-in-out;
   overflow: hidden;
+  text-align: right;
 }
 
 #searchInput > input {
@@ -203,25 +234,86 @@ h1 {
   font-weight: bold;
   border: 2px solid black;
   background: white;
-  border-radius: 4px;
+  border-radius: 3px;
   text-align: left;
-  padding: 2px 5px;
+  padding: 1px 4px 0;
   color: black;
   display: inline-block;
   text-transform: uppercase;
+  box-shadow: 0 0 0 1px #fff;
+  position: relative;
 }
 
-.licensePlate::-webkit-input-placeholder { /* WebKit browsers */
-  font-size: 19px;
-  text-transform: none;
-  font-family: "Helvetica Neue", Helvetica, sans-serif;
-  font-style: italic;
-  font-weight: normal;
+.licensePlate._large {
+  font-size: 24px;
+  border-width: 3px;
+  box-shadow: 0 0 0 2px #fff;
 }
 
-.licensePlate > span:nth-child(2) {
+.licensePlate > span:first-child {
+  font-size: 8px;
+  margin-right: 2px;
+}
+
+.licensePlate._input > span:first-child {
+  font-size: 10px;
+  margin-right: 3px;
+}
+
+.licensePlate._input._large > span:first-child {
+  font-size: 15px;
+  margin-right: 5px;
+}
+
+.licensePlate > input {
+  width: 160px;
+  font-size: 21px;
+  background: transparent;
+  border: none;
+  outline: none;
+  text-transform: uppercase;
+  font-family: kenteken, arial;
+  font-weight: bold;
+  padding: 0;
+  margin: 0;
+}
+
+.licensePlate._large > input {
+  width: 220px;
+  font-size: 27px;
+  text-align: center;
+}
+
+.licensePlate > input::-webkit-input-placeholder { /* WebKit browsers */
+  /*font-size: 19px;*/
+  /*text-transform: none;*/
+  /*font-family: "Helvetica Neue", Helvetica, sans-serif;*/
+  /*font-style: italic;*/
+  /*font-weight: normal;*/
+  color: #666;
+}
+
+.licensePlate._large > input::-webkit-input-placeholder { /* WebKit browsers */
+  font-size: 26px;
+}
+
+.licensePlate .clickBox {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: 24px;
+}
+
+.licensePlate._large .clickBox {
+  width: 30px;
+}
+
+/*.licensePlate > span:nth-child(2):before {
+  content: '\2022';
   margin: 0 3px;
-}
+}*/
 
 #rankingTable tr {
   background-color: #ffd;
@@ -323,10 +415,6 @@ h1 {
 
 #selectCountry {
   position: fixed;
-  top: 0px;
+  top: 0;
 }
-
-#changeCountry {
-  font-size: 12px;
-  margin-left: 3px;
-}
+                                                                                                  
