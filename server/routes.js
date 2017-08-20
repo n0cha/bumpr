@@ -70,7 +70,7 @@ module.exports = function (router, db) {
 			SELECT points.country, points.license, SUM(score / count) AS score FROM points
 				LEFT JOIN (
 					SELECT hash, COUNT(*) AS count FROM points
-					WHERE ts >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+					WHERE ts >= DATE_SUB(ts, INTERVAL 1 DAY)
 					GROUP BY hash
 				) AS counts
 				ON counts.hash = points.hash
