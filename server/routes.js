@@ -32,7 +32,7 @@ module.exports = function (router, db) {
 			return res.json({error: true, message: 'Invalid license plate number'});
 		}
 		var sql = 'INSERT INTO points (hash, country, license, score, location_lat, location_lng) VALUES (?, ?, ?, ?, ?, ?)';
-		let location = req.body.location || {};
+		let location = req.body.location || {lat: null, lng: null};
 		var values = [req.body.hash.toLowerCase(), req.body.country.toUpperCase(), license, upDown ? 1 : -1, location.lat, location.lng];
 		query(res, sql, values, send);
 	};
