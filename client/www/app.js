@@ -79,11 +79,11 @@ function thumbsDownButtonOnclick() {
 
 function sendThumb(type) {
   const license = document.getElementById('plateNumber');
-  if (license.value === myLicense) {
+  if (license.value.toLocaleUpperCase() === myLicense) {
     setMessage('Personal feedback?!?');
     return;
   }
-  
+
   fetch(`${apiUrl}thumbs${type}`, {
     method: "POST",
     body: JSON.stringify({
