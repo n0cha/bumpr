@@ -29,8 +29,9 @@ module.exports = function (router, db) {
 		if (!validateLicense(license)) {
 			return res.json({error: true, message: 'Invalid license plate number'});
 		}
-		var sql = 'INSERT INTO points (hash, country, license, score) VALUES (?, ?, ?, ?)';
-		var values = [req.body.hash.toLowerCase(), req.body.country.toUpperCase(), license, upDown ? 1 : -1];
+		var sql = 'INSERT INTO points (hash, country, license, score, location_lat, location_lng) VALUES (?, ?, ?, ?, ?, ?)';
+		let location = req.body.location || {};
+		var values = [req.body.hash.toLowerCase(), req.body.country.toUpperCase(), license, upDown ? 1 : -1, location.lat, location.lng];
 		query(res, sql, values, send);
 	};
 	
