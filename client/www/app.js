@@ -1,5 +1,5 @@
 const apiUrl = 'http://phondr.com:3141/api/';
-const myCountry = 'NL';
+var myCountry = window.localStorage.getItem('myCountry') | 'NL';
 var myLicense = getMyPlateNumberFromStorage();
 var myScore = 0;
 var myRank = 0;
@@ -13,27 +13,52 @@ var app = {
     StatusBar.overlaysWebView(false);
     StatusBar.styleDefault();
     loadMain();
-    showLocation();
   },
 };
 
 function loadMain() {
   $('#content').load('main.html', () => {
+    $('#myPlateNumberForm').hide();
+    $('#main').hide();
+    $('#buttons').hide();
     const hash = window.localStorage.getItem("hash");
     if (hash && hash.length === 31) {
-      hide('myPlateNumberForm');
+      // Main screen
+      $('#loader').hide();      
+      $('#main').show();
+      $('#buttons').show();
       setMyPlateInHeader(myLicense);
       retrieveAndSetScore();
     } else {
-      show('myPlateNumberForm');
-      hide('main');
+      // Get user info screen
+      getCountry(function(country) {
+        if (!country.error) {
+          populateCountrySelect(country);
+          $('#loader').hide();
+          $('#myPlateNumberForm').show();
+        }
+        else showError(country.error);
+      });      
     }
     
     $('input').keypress(preventNonAlphaNumericCharacters);
     $('#like').on('click', thumbsUpButtonOnclick);
     $('#dislike').on('click', thumbsDownButtonOnclick);
-    $('#save').on('click', saveMyPlateNumber);
+    $('#save').on('click', saveMySettings);
     $('#rankingButton').on('click', event => showRanking());
+  });
+}
+
+function populateCountrySelect(country) {
+  $.getJSON('countries.json', function(data) {
+    $.each(data, function(key, val) {
+      $('#country').append($('<option/>').attr("value", key).text(`${val} (${key})`));
+      if (key === country.code || val === country.name) {
+        // Need to check both code and name, because not all license plate codes match
+        // For example Belgium is country BE and license B. Matches on Belgium instead
+        $(`#country option[value='${key}']`).prop('selected', true);
+      }
+    })
   });
 }
 
@@ -91,7 +116,7 @@ function sendThumb(type) {
     method: "POST",
     body: JSON.stringify({
       "hash": window.localStorage.getItem('hash'),
-      "country": 'NL',
+      "country": myCountry,
       "license": license.value
     }),
     headers: { "Content-Type": "application/json" }
@@ -109,18 +134,22 @@ function sendThumb(type) {
   });
 }
 
-function saveMyPlateNumber() {
+function saveMySettings() {
   const data = getMyPlateNumberFromForm();
-  if (!data.error) {
+  const country = $('#country').val();
+  if (!data.error && country) {
     myLicense = data.plate.toLocaleUpperCase();
+    myCountry = country;
     window.localStorage.setItem("myPlateNumber", myLicense);
+    window.localStorage.setItem("myCountry", country);
     window.localStorage.setItem("hash", generateHash());
     setMyPlateInHeader();
-    hide('myPlateNumberForm');
-    show('main');
+    $('#myPlateNumberForm').hide();
+    $('#main').show();
+    $('#buttons').show();    
     retrieveAndSetScore();
   }
-  else setStatus(data.error);
+  else setMessage(data.error);
 }
 
 function validateInput() {
@@ -175,14 +204,6 @@ function setMessage(message) {
 
 function setMyPlateInHeader() {
   document.getElementById('me').innerHTML = myLicense.toUpperCase();
-}
-
-function show(id) {
-  document.getElementById(id).style.display = '';
-}
-
-function hide(id) {
-  document.getElementById(id).style.display = 'none';
 }
 
 function generateHash() {
@@ -329,22 +350,47 @@ function showRanking(search) {
       });
 }
 
-function showLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function succes(result) {
-      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${result.coords.latitude},${result.coords.longitude}&key=AIzaSyDVqRsZXDOS1MC9BGjd_JbZXkFk1b5rOoM`).then(function(response) {
+function getCountry(callback) {
+  getLocation(function(location) {
+    if (!location.error) {
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.latitude},${location.longitude}&key=AIzaSyDVqRsZXDOS1MC9BGjd_JbZXkFk1b5rOoM`).then(function(response) {
         response.json().then(function(json) {
           json.results[0].address_components.forEach(function(item) {
-            if (item.types[0] === "country") setMessage('Location: ' + item.short_name);
+            if (item.types[0] === "country") callback({
+              code: item.short_name.toLocaleUpperCase(),
+              name: item.long_name
+            });
           })
         });
       }, function(error) {
-        showError(error.message);
-      }); 
+        callback({
+          error: `getCountry fetch error: ${error.message}`
+        })
+      });
+    } else {
+      callback({
+        error: `getLocation error: ${location.error}`
+      })
+    };
+  });
+}
+
+function getLocation(callback) {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function succes(result) {
+      callback({
+        latitude: result.coords.latitude,
+        longitude: result.coords.longitude,
+        error: false
+      })
     }, function(error) {
-      showError('PositionError.code:' + error.code);
+      callback({
+        error: error.code
+      })
     });
   } else {
-    showError('nav.geo missing');
-  }
+    callback({
+      error: 'nav.geo missing'
+    })
+  }      
 }
