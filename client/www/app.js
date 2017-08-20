@@ -32,7 +32,7 @@ function loadMain() {
     $('#like').on('click', thumbsUpButtonOnclick);
     $('#dislike').on('click', thumbsDownButtonOnclick);
     $('#save').on('click', saveMyPlateNumber);
-    $('#rankingButton').on('click', showRanking);
+    $('#rankingButton').on('click', event => showRanking());
   });
 }
 
@@ -191,38 +191,24 @@ function generateHash() {
   });
 }
 
-function showRanking() {
-  Promise.all([
-      new Promise((resolve) => {
-        $('#content').load('ranking.html', () => {
-          resolve();
-        });
-      }),
-      fetch(apiUrl + 'top10/'),
-      fetch(apiUrl + 'bottom10/')
-  ])
-      .then(responses => {
-        $('#back').on('click', loadMain);
-
-        return Promise.all([
-          responses[1].json(),
-          responses[2].json()
-        ]);
-      })
-      .then(data => {
-        const top10 = data[0].result;
-        const bottom10 = data[1].result;
-        const maxRank = bottom10[0].rank;
-        
-        var createRow = (row, type) => {
-          let icon = '';
-          if (row.rank === 1) {
-            icon = '<i class="fa fa-smile-o" aria-hidden="true"></i>';
-          } else if (row.rank === maxRank) {
-            icon = '<i class="fa fa-frown-o" aria-hidden="true"></i>';
-          }
-          
-          return `
+function drawRankingTable(top10, bottom10, searchData) {
+  const maxRank = bottom10[0].rank;
+  
+  var createRow = (row, type) => {
+    let icon = '';
+    if (row.rank === 1) {
+      icon = '<i class="fa fa-smile-o" aria-hidden="true"></i>';
+    } else if (row.rank === maxRank) {
+      icon = '<i class="fa fa-frown-o" aria-hidden="true"></i>';
+    }
+    
+    if (row.country === myCountry && row.license === myLicense) {
+      type = 'self';
+    } else if (searchData && row.country === searchData.country && row.license === searchData.license) {
+      type = 'search';
+    }
+    
+    return `
               <tr class="${type}">
                 <td>${icon}</td>
                 <td>${row.rank}</td>
@@ -232,30 +218,112 @@ function showRanking() {
                 <td>${calculateScore(row.score)}</td>
               </tr>
           `;
-        };
-        
-        var createSpacer = () => {
-          return '<tr class="spacer"><td></td><td><i class="fa fa-ellipsis-v" aria-hidden="true"></i><td></td><td></td></tr>';
-        };
-        
-        top10.forEach((row) => {
-          if (row.rank < myRank) {
-            $('#rankingTable').append(createRow(row, 'top'));
+  };
+  
+  var createSpacer = () => {
+    return '<tr class="spacer"><td></td><td><i class="fa fa-ellipsis-v" aria-hidden="true"></i><td></td><td></td></tr>';
+  };
+  
+  var appendSelfRow = function () {
+    if (myRank > 10 && myRank < maxRank - 9) {
+      $('#rankingTable').append(createRow({
+        country: myCountry,
+        license: myLicense,
+        score: myScore,
+        rank: myRank
+      }, 'self'));
+      
+      $('#rankingTable').append(createSpacer());
+    }
+  };
+  
+  var appendSearchRow = function () {
+    if (searchData.rank > 10 && searchData.rank < maxRank - 9) {
+      $('#rankingTable').append(createRow(searchData, 'search'));
+      
+      $('#rankingTable').append(createSpacer());
+    }
+  };
+  
+  $('#rankingTable').empty();
+  
+  top10.forEach((row) => {
+    $('#rankingTable').append(createRow(row, 'top'));
+  });
+  
+  $('#rankingTable').append(createSpacer());
+  
+  if (searchData && (searchData.country !== myCountry || searchData.license !== myLicense)) {
+    if (myRank > searchData.rank) {
+      appendSearchRow();
+      appendSelfRow();
+    } else {
+      appendSelfRow();
+      appendSearchRow();
+    }
+  } else {
+    appendSelfRow();
+  }
+  
+  bottom10.reverse().forEach((row) => {
+    if (row.rank > myRank) {
+      $('#rankingTable').append(createRow(row, 'bottom'));
+    }
+  });
+  
+  // if (searchData) {
+  //   $('.search')[0].scrollIntoView();
+  // }
+}
+
+function showRanking(search) {
+  let requests = [
+    new Promise((resolve) => {
+      $('#content').load('ranking.html', () => {
+        resolve();
+      });
+    }),
+    fetch(`${apiUrl}top10/`),
+    fetch(`${apiUrl}bottom10/`),
+  ];
+  
+  if (search) {
+    requests.push(fetch(`${apiUrl}score/${myCountry}/${search}`));
+  }
+  
+  Promise.all(requests)
+      .then(responses => {
+        $('#back').on('click', loadMain);
+        $('#searchButton').on('click', () => {
+          const $searchInput = $('#searchInput');
+          $searchInput.toggleClass('_hidden');
+          $searchInput.children('input').focus();
+        });
+        $('#searchInput').children('input').on('keypress', event => {
+          if (event.keyCode === 13) {
+            const $searchInput = $('#searchInput');
+            $searchInput.addClass('_hidden');
+            showRanking($searchInput.children('input').val());
           }
         });
-
-        if (myRank > 10) {
-          $('#rankingTable').append(createSpacer());
+        
+        let responseData = [
+          responses[1].json(),
+          responses[2].json()
+        ];
+        
+        if (search) {
+          responseData.push(responses[3].json());
         }
-        $('#rankingTable').append(createRow({country: myCountry, license: myLicense, score: myScore, rank: myRank}, 'self'));
-        if (myRank < maxRank - 9) {
-          $('#rankingTable').append(createSpacer());
-        }
 
-        bottom10.reverse().forEach((row) => {
-          if (row.rank > myRank) {
-            $('#rankingTable').append(createRow(row, 'bottom'));
-          }
+        return Promise.all(responseData);
+      })
+      .then(data => {
+        drawRankingTable(data[0].result, data[1].result, search && {
+          country: myCountry.toLocaleUpperCase(),
+          license: search.toLocaleUpperCase(),
+          score: data[2].result.score,
+          rank: data[2].result.rank
         });
       });
 }

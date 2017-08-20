@@ -73,13 +73,14 @@ h1 {
   padding: 5px;
   width: 100%;
   box-sizing: border-box;
-  text-transform: uppercase;  
+  text-transform: uppercase;
   text-align: center;
   font-family: "kenteken";
   border: 3px solid #777;
   border-radius: 6px;
 }
-::-webkit-input-placeholder { /* WebKit browsers */
+
+.plateNumber::-webkit-input-placeholder { /* WebKit browsers */
   font-size: 28px;
   text-transform: none;
   font-family: "Helvetica Neue", Helvetica, sans-serif;
@@ -131,25 +132,25 @@ h1 {
 
 #rankingTitle {
   position: fixed;
-  top: 50px;
+  top: 48px;
   left: 0;
   right: 0;
   background: #ddd;
   width: 100%;
 }
 
-#back {
+.iconButton {
   border: 2px solid black;
   background: #fff;
   width: 34px;
   height: 34px;
   border-radius: 4px;
-  margin: 3px;
+  margin: 4px;
   vertical-align: middle;
   padding: 0;
 }
 
-#back:hover {
+.iconButton:hover {
   border-color: white;
   color: white;
   background: black;
@@ -161,6 +162,30 @@ h1 {
   border-spacing: 0;
   font-size: 18px;
   margin-top: 90px;
+}
+
+#searchButton {
+  right: 0;
+  position: absolute;
+}
+
+#searchInput {
+  right: 40px;
+  position: absolute;
+  top: 4px;
+  background: inherit;
+  width: 175px;
+  transition: all 0.5s ease-in-out;
+  overflow: hidden;
+}
+
+#searchInput > input {
+  width: 160px;
+  font-size: 19px;
+}
+
+#searchInput._hidden {
+  width: 0;
 }
 
 #rankingTable td {
@@ -183,6 +208,15 @@ h1 {
   padding: 2px 5px;
   color: black;
   display: inline-block;
+  text-transform: uppercase;
+}
+
+.licensePlate::-webkit-input-placeholder { /* WebKit browsers */
+  font-size: 19px;
+  text-transform: none;
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-style: italic;
+  font-weight: normal;
 }
 
 .licensePlate > span:nth-child(2) {
@@ -195,8 +229,12 @@ h1 {
   color: #333;
 }
 
+/*#rankingTable tr:nth-child(even) {
+  background: palegoldenrod;
+}*/
+
 #rankingTable tr:first-child {
-  background: gold;
+  background: yellowgreen;
   font-weight: bold;
 }
 
@@ -225,6 +263,11 @@ h1 {
 
 #rankingTable tr.self {
   background: lightblue;
+  font-weight: bold;
+}
+
+#rankingTable tr.search {
+  background: goldenrod;
   font-weight: bold;
 }
 
