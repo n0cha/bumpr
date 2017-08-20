@@ -1,5 +1,5 @@
 const apiUrl = 'http://phondr.com:3141/api/';
-var myCountry = window.localStorage.getItem('myCountry') | 'NL';
+var myCountry = window.localStorage.getItem('myCountry') || 'NL';
 var myLicense = getMyPlateNumberFromStorage();
 var myScore = 0;
 var myRank = 0;
@@ -24,6 +24,7 @@ function loadMain() {
     const hash = window.localStorage.getItem("hash");
     if (hash && hash.length === 31) {
       // Main screen
+      populateCountrySelect('#selectCountry', { code: myCountry , name: ''});
       $('#loader').hide();      
       $('#main').show();
       $('#buttons').show();
@@ -33,7 +34,7 @@ function loadMain() {
       // Get user info screen
       getCountry(function(country) {
         if (!country.error) {
-          populateCountrySelect(country);
+          populateCountrySelect('#myCountry', country);
           $('#loader').hide();
           $('#myPlateNumberForm').show();
         }
@@ -46,17 +47,18 @@ function loadMain() {
     $('#dislike').on('click', thumbsDownButtonOnclick);
     $('#save').on('click', saveMySettings);
     $('#rankingButton').on('click', event => showRanking());
+    $('#changeCountry').click(() => $('#selectCountry').trigger('focus'));
   });
 }
 
-function populateCountrySelect(country) {
+function populateCountrySelect(locator, country) {
   $.getJSON('countries.json', function(data) {
     $.each(data, function(key, val) {
-      $('#country').append($('<option/>').attr("value", key).text(`${val} (${key})`));
+      $(locator).append($('<option/>').attr("value", key).text(`${val} (${key})`));
       if (key === country.code || val === country.name) {
         // Need to check both code and name, because not all license plate codes match
         // For example Belgium is country BE and license B. Matches on Belgium instead
-        $(`#country option[value='${key}']`).prop('selected', true);
+        $(`${locator} option[value='${key}']`).prop('selected', true);
       }
     })
   });
@@ -112,11 +114,17 @@ function sendThumb(type) {
     return;
   }
 
+  const country = $('#selectCountry').val();
+  if (isValidCountryLenght(country)) {
+    showError('No country selected, is this possible?');
+    return;
+  }
+
   fetch(`${apiUrl}thumbs${type}`, {
     method: "POST",
     body: JSON.stringify({
       "hash": window.localStorage.getItem('hash'),
-      "country": myCountry,
+      "country": country,
       "license": license.value
     }),
     headers: { "Content-Type": "application/json" }
@@ -141,8 +149,8 @@ function saveMySettings() {
     return;
   }
 
-  const country = $('#country').val();
-  if (country.length < 1 || country.length > 4) {
+  const country = $('#myCountry').val();
+  if (isValidCountryLenght(country)) {
     setMessage('Select a country');
     return
   }
@@ -153,10 +161,15 @@ function saveMySettings() {
   window.localStorage.setItem("myCountry", country);
   window.localStorage.setItem("hash", generateHash());
   setMyPlateInHeader();
+  populateCountrySelect('#selectCountry', { code: myCountry , name: ''});  
   $('#myPlateNumberForm').hide();
   $('#main').show();
   $('#buttons').show();    
   retrieveAndSetScore();
+}
+
+function isValidCountryLenght(country) {
+  return country.length < 1 || country.length > 4;
 }
 
 function validateInput() {
