@@ -9,7 +9,14 @@
     "installed_plugins": {
         "cordova-plugin-statusbar": {
             "PACKAGE_NAME": "me.bumpr"
+        },
+        "cordova-plugin-geolocation": {
+            "PACKAGE_NAME": "me.bumpr"
         }
     },
-    "dependent_plugins": {}
+    "dependent_plugins": {
+        "cordova-plugin-compat": {
+            "PACKAGE_NAME": "me.bumpr"
+        }
+    }
 }

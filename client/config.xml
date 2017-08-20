@@ -39,4 +39,5 @@
     </platform>
     <plugin name="cordova-plugin-statusbar" spec="~2.2.3" />
     <preference name="StatusBarOverlaysWebView" value="false" />
+    <plugin name="cordova-plugin-geolocation" spec="~2.4.3" />
 </widget>

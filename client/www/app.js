@@ -13,6 +13,7 @@ var app = {
     StatusBar.overlaysWebView(false);
     StatusBar.styleDefault();
     loadMain();
+    showLocation();
   },
 };
 
@@ -326,4 +327,24 @@ function showRanking(search) {
           rank: data[2].result.rank
         });
       });
+}
+
+function showLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function succes(result) {
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${result.coords.latitude},${result.coords.longitude}&key=AIzaSyDVqRsZXDOS1MC9BGjd_JbZXkFk1b5rOoM`).then(function(response) {
+        response.json().then(function(json) {
+          json.results[0].address_components.forEach(function(item) {
+            if (item.types[0] === "country") setMessage('Location: ' + item.short_name);
+          })
+        });
+      }, function(error) {
+        showError(error.message);
+      }); 
+    }, function(error) {
+      showError('PositionError.code:' + error.code);
+    });
+  } else {
+    showError('nav.geo missing');
+  }
 }
