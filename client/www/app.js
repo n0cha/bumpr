@@ -26,12 +26,22 @@ function loadMain() {
       hide('main');
     }
     
+    $('input').keypress(preventNonAlphaNumericCharacters);
     $('#like').on('click', thumbsUpButtonOnclick);
     $('#dislike').on('click', thumbsDownButtonOnclick);
     $('#save').on('click', saveMyPlateNumber);
     $('#rankingButton').on('click', showRanking);
   });
 }
+
+function preventNonAlphaNumericCharacters(e) {
+  var regex = new RegExp("^[a-zA-Z0-9]$");
+  var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+  if (!regex.test(key)) {
+     event.preventDefault();
+     return false
+  };
+};
 
 function retrieveAndSetScore() {
   const path = apiUrl + 'score/' + 'NL/' + myLicense;
@@ -69,6 +79,11 @@ function thumbsDownButtonOnclick() {
 
 function sendThumb(type) {
   const license = document.getElementById('plateNumber');
+  if (license.value === myLicense) {
+    setMessage('Personal feedback?!?');
+    return;
+  }
+  
   fetch(`${apiUrl}thumbs${type}`, {
     method: "POST",
     body: JSON.stringify({
