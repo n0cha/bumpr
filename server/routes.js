@@ -20,9 +20,17 @@ module.exports = function (router, db) {
 		res.json({message: 'Bumpr REST API'});
 	});
 	
+	var validateLicense = function (license) {
+		return /^[A-Z0-9]{1,9}$/.test(license);
+	};
+	
 	var thumbs = function (req, res, upDown) {
+		var license = req.body.license.toUpperCase();
+		if (!validateLicense(license)) {
+			return res.json({error: true, message: 'Invalid license plate number'});
+		}
 		var sql = 'INSERT INTO points (hash, country, license, score) VALUES (?, ?, ?, ?)';
-		var values = [req.body.hash.toLowerCase(), req.body.country.toUpperCase(), req.body.license.toUpperCase(), upDown ? 1 : -1];
+		var values = [req.body.hash.toLowerCase(), req.body.country.toUpperCase(), license, upDown ? 1 : -1];
 		query(res, sql, values, send);
 	};
 	
@@ -35,6 +43,13 @@ module.exports = function (router, db) {
 	});
 	
 	router.get('/score/:country/:license', function (req, res) {
+		var country = req.params.country.toUpperCase();
+		var license = req.params.license.toUpperCase();
+		
+		if (!validateLicense(license)) {
+			return res.json({error: true, message: 'Invalid license plate number'});
+		}
+		
 		var sql = `
 				SELECT SUM(score / count) AS weighted_score FROM points
 					LEFT JOIN (
@@ -47,8 +62,7 @@ module.exports = function (router, db) {
 					AND points.country = ?
 					AND points.license = ?
 		`;
-		var country = req.params.country.toUpperCase();
-		var license = req.params.license.toUpperCase();
+		
 		query(res, sql, [country, license], (res, rows) => {
 			var score = (rows[0] || {}).weighted_score || 0;
 			sql = `

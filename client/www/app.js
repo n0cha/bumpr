@@ -1,4 +1,4 @@
-const apiUrl = 'http://phondr.com:3000/api/';
+const apiUrl = 'http://phondr.com:3141/api/';
 const myCountry = 'NL';
 var myLicense = window.localStorage.getItem('myPlateNumber').toLocaleUpperCase();
 

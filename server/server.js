@@ -3,7 +3,7 @@ var mysql = require('mysql');
 var bodyParser = require('body-parser');
 var routes = require('./routes.js');
 var app = express();
-var port = 3000;
+var port = 3141;
 
 var Server = {
 	connectDb: function() {
