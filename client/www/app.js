@@ -9,7 +9,6 @@ var app = {
 
   onDeviceReady: function() {
     StatusBar.overlaysWebView(false);
-    StatusBar.backgroundColorByName("lightGray");
     StatusBar.styleDefault();
     loadMain();
   },
@@ -27,9 +26,9 @@ function loadMain() {
       hide('main');
     }
     
-    document.getElementById('like').onclick = thumbsUpButtonOnclick;
-    document.getElementById('dislike').onclick = thumbsDownButtonOnclick;
-    document.getElementById('save').onclick = saveMyPlateNumber;
+    $('#like').on('click', thumbsUpButtonOnclick);
+    $('#dislike').on('click', thumbsDownButtonOnclick);
+    $('#save').on('click', saveMyPlateNumber);
     $('#rankingButton').on('click', showRanking);
   });
 }
@@ -57,19 +56,18 @@ function calculateScore(score) {
 }
 
 function thumbsUpButtonOnclick() {
-  const error = validateInput();
-  if (!error) sendThumb('up');
-  else setStatus(error);
+  const validatationError = validateInput();
+  if (!validatationError) sendThumb('up');
+  else setMessage(validatationError);
 }
 
 function thumbsDownButtonOnclick() {
-  const error = validateInput();
-  if (!error) sendThumb('down');
-  else setStatus(error);
+  const validatationError = validateInput();
+  if (!validatationError) sendThumb('down');
+  else setMessage(validatationError);
 }
 
 function sendThumb(type) {
-  setStatus('Sending data...');
   const license = document.getElementById('plateNumber');
   try {
     fetch(apiUrl + 'thumbs' + type, {
@@ -84,7 +82,7 @@ function sendThumb(type) {
       response.json().then(function(json) {
         if (json.error) setStatus('Error: ' + json.message)
         else {
-          setStatus(json.message);
+          setMessage('Thanks for the feedback!');
           retrieveAndSetScore();          
         }
       });
@@ -135,6 +133,10 @@ function getMyPlateNumber() {
 
 function setStatus(message) {
   document.getElementById('status').innerHTML = message;  
+}
+
+function setMessage(message) {
+  document.getElementById('message').innerHTML = message;  
 }
 
 function setMyPlateInHeader() {
