@@ -47,7 +47,7 @@ function retrieveAndSetScore() {
       document.getElementById('rank').innerHTML = json.result.rank;
     });
   }, function(error) {
-    document.getElementById('status').innerHTML = error.message;
+    showError(error.message);
   }); 
 }
 
@@ -69,31 +69,26 @@ function thumbsDownButtonOnclick() {
 
 function sendThumb(type) {
   const license = document.getElementById('plateNumber');
-  try {
-    fetch(apiUrl + 'thumbs' + type, {
-      method: "POST",
-      body: JSON.stringify({
-        "hash": window.localStorage.getItem('hash'),
-        "country": 'NL',
-        "license": license.value
-      }),
-      headers: { "Content-Type": "application/json" }
-    }).then(function(response) {
-      response.json().then(function(json) {
-        if (json.error) setStatus('Error: ' + json.message)
-        else {
-          setMessage('Thanks for the feedback!');
-          retrieveAndSetScore();          
-        }
-      });
-      license.value = '';
-    }, function(error) {
-      setStatus(error.message);
-    })      
-  } catch (error) {
-    setStatus('Try error: ' + error.message);    
-  }
-
+  fetch(`${apiUrl}thumbs${type}`, {
+    method: "POST",
+    body: JSON.stringify({
+      "hash": window.localStorage.getItem('hash'),
+      "country": 'NL',
+      "license": license.value
+    }),
+    headers: { "Content-Type": "application/json" }
+  }).then(function(response) {
+    response.json().then(function(json) {
+      if (json.error) showError(`Error: ${json.message}`)
+      else {
+        setMessage('Thanks for the feedback!');
+        retrieveAndSetScore();          
+      }
+    });
+    license.value = '';
+  }, function(error) {
+    showError(error.message);
+  });
 }
 
 function saveMyPlateNumber() {
@@ -137,8 +132,18 @@ function getMyPlateNumberFromStorage() {
   else return false;
 }
 
-function setStatus(message) {
-  document.getElementById('status').innerHTML = message;  
+function showError(message) {
+  let errorDiv =  $('<div/>')
+    .attr("id", "error")
+    .addClass("error")
+    .append("<span/>")
+    .text(message);
+
+  errorDiv.on('click', function() {
+    errorDiv.remove();
+  })
+
+  $('body').append(errorDiv);  
 }
 
 function setMessage(message) {
