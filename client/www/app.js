@@ -133,17 +133,22 @@ function getMyPlateNumberFromStorage() {
 }
 
 function showError(message) {
-  let errorDiv =  $('<div/>')
-    .attr("id", "error")
-    .addClass("error")
-    .append("<span/>")
-    .text(message);
+  let errorView =  $('<div/>').attr("id", "error").addClass("error");
+  let text = $('<div/>').attr("id", "errorText").text('You have encountered an issue that caused an error to happen. Please restart app and try again...');
+  let icon = $('<i/>').attr("id", "errorIcon").attr('aria-hidden', true).addClass('fa fa-exclamation-triangle fa-3x');
+  let closeBtn = $('<i/>').attr("id", "errorClose").attr('aria-hidden', true).addClass('fa fa-times fa-3x');
+  let messageSpan = $('<div/>').attr("id", "errorMessage").text(`Error: ${message}`);
 
-  errorDiv.on('click', function() {
-    errorDiv.remove();
+  errorView.append(icon);
+  errorView.append(text);
+  errorView.append(messageSpan);
+  errorView.append(closeBtn);
+
+  closeBtn.on('click', function() {
+    errorView.remove();
   })
 
-  $('body').append(errorDiv);  
+  $('body').append(errorView);  
 }
 
 function setMessage(message) {

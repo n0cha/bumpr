@@ -201,3 +201,25 @@ h1 {
   z-index: 2;
   background-color: #ddd;
 }
+
+#errorIcon {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+}
+
+#errorClose {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
+
+#errorText {
+  margin: 30% auto 0 auto;
+  width: 80%
+}
+
+#errorMessage {
+  margin: 10% auto;
+  width: 80%
+}
