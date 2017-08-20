@@ -1,6 +1,6 @@
 const apiUrl = 'http://phondr.com:3141/api/';
 const myCountry = 'NL';
-var myLicense = window.localStorage.getItem('myPlateNumber').toLocaleUpperCase();
+var myLicense = getMyPlateNumberFromStorage();
 
 var app = {
   initialize: function() {
@@ -97,7 +97,7 @@ function sendThumb(type) {
 }
 
 function saveMyPlateNumber() {
-  const data = getMyPlateNumber();
+  const data = getMyPlateNumberFromForm();
   if (!data.error) {
     myLicense = data.plate.toLocaleUpperCase();
     window.localStorage.setItem("myPlateNumber", myLicense);
@@ -107,7 +107,7 @@ function saveMyPlateNumber() {
     show('main');
     retrieveAndSetScore();
   }
-  else setStatus(data.error);
+  else setMessage(data.error);
 };
 
 function validateInput() {
@@ -119,7 +119,7 @@ function validateInput() {
   return error;
 }
 
-function getMyPlateNumber() {
+function getMyPlateNumberFromForm() {
   let result = {
     plate: '',
     error: false
@@ -129,6 +129,12 @@ function getMyPlateNumber() {
   else result.plate = plateNumber;
 
   return result;
+}
+
+function getMyPlateNumberFromStorage() {
+  const license = window.localStorage.getItem('myPlateNumber');
+  if (license) return license.toLocaleUpperCase();
+  else return false;
 }
 
 function setStatus(message) {

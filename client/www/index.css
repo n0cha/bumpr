@@ -25,7 +25,7 @@ h1 {
   background-color: #333;
   padding: 8px;
   color: #eee;
-  font-size: 25px;
+  font-size: 22px;
   display:flex;
   align-items:center;
   z-index: 1;
@@ -65,11 +65,7 @@ h1 {
 
 #myPlateNumberForm {
   text-align: center;
-  margin: 30% auto;
-}
-
-#save {
-  font-size: 20px;
+  margin: 30% auto 10% auto;
 }
 
 .plateNumber {
@@ -84,7 +80,7 @@ h1 {
   border-radius: 6px;
 }
 ::-webkit-input-placeholder { /* WebKit browsers */
-  font-size: 30px;
+  font-size: 28px;
   text-transform: none;
   font-family: "Helvetica Neue", Helvetica, sans-serif;
 }
@@ -123,11 +119,20 @@ h1 {
   margin: 0 auto;
   display: block;
   font-size: 30px;
-  font-width: bold;
   padding: 5px 20px;
   border-radius: 5px;
   font-family: kenteken, arial;
   background: #fff;
+}
+
+#save {
+  margin: 10% auto;
+  display: block;
+  font-size: 30px;
+  padding: 5px 20px;
+  border-radius: 5px;
+  font-family: kenteken, arial;
+  background: #fff;  
 }
 
 #rankingTitle {
