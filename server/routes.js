@@ -76,7 +76,7 @@ module.exports = function (router, db) {
 				ON counts.hash = points.hash
 				WHERE points.ts >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
 				GROUP BY country, license
-				ORDER BY score DESC
+				ORDER BY score DESC, license
 		`;
 		query(res, sql, [], (res, rows) => {
 			var index = _.findIndex(rows, {country, license});
@@ -105,7 +105,7 @@ module.exports = function (router, db) {
 							ON counts.hash = points.hash
 							WHERE points.ts >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
 							GROUP BY country, license
-							ORDER BY score ${bottom ? 'ASC' : 'DESC'} LIMIT ${limit}) p		
+							ORDER BY score ${bottom ? 'ASC' : 'DESC'}, license ${bottom ? 'DESC' : 'ASC'} LIMIT ${limit}) p		
 		`;
 		query(res, sql, [], send);
 	};
