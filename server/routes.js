@@ -1,3 +1,5 @@
+"use strict";
+
 var _ = require('lodash');
 
 module.exports = function (router, db) {
@@ -93,11 +95,11 @@ module.exports = function (router, db) {
 		var sql = `
 				SELECT p.country, p.license, p.score, @rownum := @rownum ${bottom ? '-' : '+'} 1 AS rank
 					FROM (SELECT @rownum := ${startRank}) r, 
-						(SELECT points.country, points.license, SUM(score / count) AS score
+						(SELECT points.country, points.license, SUM(score / cnt) AS score
 							FROM points
 							LEFT JOIN (
-								SELECT hash, COUNT(*) AS count FROM points
-								WHERE ts >= DATE_SUB(NOW(), INTERVAL 1 DAY)
+								SELECT hash, COUNT(*) AS cnt FROM points
+								WHERE ts >= DATE_SUB(ts, INTERVAL 1 DAY)
 								GROUP BY hash
 							) AS counts
 							ON counts.hash = points.hash
