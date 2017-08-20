@@ -72,7 +72,7 @@ function preventNonAlphaNumericCharacters(e) {
 }
 
 function retrieveAndSetScore() {
-  const path = apiUrl + 'score/' + 'NL/' + myLicense;
+  const path = `${apiUrl}score/${myCountry}/${myLicense}`;
   fetch(path).then(function(response) {
     response.json().then(function(json) {
       myScore = json.result.score;
@@ -135,21 +135,28 @@ function sendThumb(type) {
 }
 
 function saveMySettings() {
-  const data = getMyPlateNumberFromForm();
-  const country = $('#country').val();
-  if (!data.error && country) {
-    myLicense = data.plate.toLocaleUpperCase();
-    myCountry = country;
-    window.localStorage.setItem("myPlateNumber", myLicense);
-    window.localStorage.setItem("myCountry", country);
-    window.localStorage.setItem("hash", generateHash());
-    setMyPlateInHeader();
-    $('#myPlateNumberForm').hide();
-    $('#main').show();
-    $('#buttons').show();    
-    retrieveAndSetScore();
+  const license = $('#myPlateNumber').val();
+  if (license.length < 1 || license.length > 9) {
+    setMessage('Type a license');
+    return;
   }
-  else setMessage(data.error);
+
+  const country = $('#country').val();
+  if (country.length < 1 || country.length > 4) {
+    setMessage('Select a country');
+    return
+  }
+
+  myLicense = license.toLocaleUpperCase();
+  myCountry = country;
+  window.localStorage.setItem("myPlateNumber", myLicense);
+  window.localStorage.setItem("myCountry", country);
+  window.localStorage.setItem("hash", generateHash());
+  setMyPlateInHeader();
+  $('#myPlateNumberForm').hide();
+  $('#main').show();
+  $('#buttons').show();    
+  retrieveAndSetScore();
 }
 
 function validateInput() {
@@ -159,18 +166,6 @@ function validateInput() {
     error = 'Missing platenumber';
   }
   return error;
-}
-
-function getMyPlateNumberFromForm() {
-  let result = {
-    plate: '',
-    error: false
-  };
-  const plateNumber = document.getElementById('myPlateNumber').value;
-  if (plateNumber.length <= 0) result.error = 'Missing platenumber';
-  else result.plate = plateNumber;
-
-  return result;
 }
 
 function getMyPlateNumberFromStorage() {
