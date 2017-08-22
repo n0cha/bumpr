@@ -4,6 +4,10 @@ var myLicense = getMyPlateNumberFromStorage();
 var myScore = 0;
 var myRank = 0;
 let selectedCountry = myCountry;
+const sounds = {
+  thumbsup: new Audio('static/chime_done.wav'),
+  thumbsdown: new Audio('static/chime_dim.wav')
+};
 
 let countries;
 $.getJSON('static/countries.json', c => {
@@ -61,8 +65,8 @@ function loadMain() {
 
 function populateCountrySelect() {
   _(countries).map((country, key) => Object.assign(country, {key})).sortBy('name').each(country => {
-    const isSelected = (country.key === selectedCountry);
-    $('#selectCountry').append(`<option value="${country.key}" ${isSelected ? 'selected' : ''}>${country.name} (${country.key})</option>`);
+    const selected = (country.key === selectedCountry) ? 'selected' : '';
+    $('#selectCountry').append(`<option value="${country.key}" ${selected}>${country.name} (${country.key})</option>`);
   });
 }
 
@@ -75,21 +79,26 @@ function preventNonAlphaNumericCharacters(event) {
 }
 
 function retrieveAndSetScore() {
-  const path = `${apiUrl}score/${myCountry}/${myLicense}`;
-  fetch(path).then(function(response) {
-    response.json().then(function(json) {
-      myScore = json.result.score;
-      myRank = json.result.rank;
-      
-      const smile = myScore > 0 ? 'smile' : myScore < 0 ? 'frown' : 'meh';
-      
-      document.getElementById('score').innerHTML = String(calculateScore(myScore));
-      document.getElementById('smile').innerHTML = `<i class="fa fa-${smile}-o" aria-hidden="true"></i>`;
-      document.getElementById('rank').innerHTML = String(myRank);
-    });
-  }, function(error) {
-    showError(error.message);
-  });
+  fetch(`${apiUrl}score/${myCountry}/${myLicense}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`${response.url}: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
+      .then(json => {
+        myScore = json.result.score;
+        myRank = json.result.rank;
+        
+        const smile = myScore > 0 ? 'smile' : myScore < 0 ? 'frown' : 'meh';
+        
+        document.getElementById('score').innerHTML = String(calculateScore(myScore));
+        document.getElementById('smile').innerHTML = `<i class="fa fa-${smile}-o" aria-hidden="true"></i>`;
+        document.getElementById('rank').innerHTML = String(myRank);
+      })
+      .catch(error => {
+        showError(error.message);
+      });
 }
 
 function calculateScore(score) {
@@ -121,7 +130,8 @@ function sendThumb(isUp) {
   }
   
   getLocation(location => {
-    fetch(`${apiUrl}thumbs${isUp ? 'up' : 'down'}`, {
+    const thumb = `thumbs${isUp ? 'up' : 'down'}`;
+    fetch(`${apiUrl}${thumb}`, {
       method: 'POST',
       body: JSON.stringify({
         hash: window.localStorage.getItem('key'),
@@ -138,7 +148,7 @@ function sendThumb(isUp) {
         if (json.error) {
           showError(`Error: ${json.message}`);
         } else {
-          (new Audio(`static/chime_${isUp ? 'done' : 'dim'}.wav`)).play();
+          sounds[thumb].play();
           setMessage('Thanks for the feedback!');
           retrieveAndSetScore();
         }
