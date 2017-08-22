@@ -28,6 +28,8 @@ var app = {
 
 function loadMain() {
   $('#content').load('main.html', () => {
+    $('#feedback').hide();
+    
     const key = window.localStorage.getItem('key');
     if (!key || key.length !== 32) {
       $('.main').hide();
@@ -87,6 +89,10 @@ function retrieveAndSetScore() {
         return response.json();
       })
       .then(json => {
+        if (json.error) {
+          return showError(json.message);
+        }
+        
         myScore = json.result.score;
         myRank = json.result.rank;
         
@@ -97,7 +103,7 @@ function retrieveAndSetScore() {
         document.getElementById('rank').innerHTML = String(myRank);
       })
       .catch(error => {
-        showError(error.message);
+        showError(error);
       });
 }
 
@@ -148,6 +154,7 @@ function sendThumb(isUp) {
         if (json.error) {
           showError(`Error: ${json.message}`);
         } else {
+          showFeedback(thumb);
           sounds[thumb].play();
           setMessage('Thanks for the feedback!');
           retrieveAndSetScore();
@@ -156,6 +163,16 @@ function sendThumb(isUp) {
       $('#plateNumber input').val('');
     }, function(error) {
       showError(error.message);
+    });
+  });
+}
+
+function showFeedback(which) {
+  $('#feedback').show();
+  const image = $(`#${which}Feedback > img`);
+  image.animate({width: '100vw', height: '100vw'}, 250, () => {
+    image.animate({width: 0, height: 0}, 250, () => {
+      $('#feedback').hide();
     });
   });
 }
@@ -216,7 +233,7 @@ function showError(message) {
 }
 
 function setMessage(message) {
-  document.getElementById('message').innerHTML = message;
+  $('#message').text(message).show();
 }
 
 function setMyPlateInHeader() {

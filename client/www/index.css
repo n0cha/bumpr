@@ -51,13 +51,17 @@ h1 {
 }
 
 #main {
-  margin: 30% auto 10% auto;
+  margin: 20vh auto 0;
 }
 
 #message {
-  margin: 0 auto 0 auto;
-  height: 1em;
   text-align: center;
+  margin: 11px auto;
+  width: 242px;
+  border-radius: 4px;
+  padding: 10px;
+  background: #fff;
+  display: none;
 }
 
 #setupTitle {
@@ -119,11 +123,14 @@ h1 {
 }
 
 #buttons {
-  margin: 20% auto;
-}
+  position: absolute;
+  bottom: 20vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;}
 
 #buttons > button {
-  margin: 0 auto;
   display: block;
   font-size: 30px;
   font-weight: bold;
@@ -142,7 +149,6 @@ h1 {
 
 
 #save {
-  margin: 10% auto;
   display: block;
   font-size: 30px;
   padding: 5px 20px;
@@ -417,4 +423,23 @@ h1 {
   position: fixed;
   top: 0;
 }
-                                                                                                  
+
+#feedback {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#feedback > div {
+  position: absolute;
+}
+
+#feedback > div > img {
+  width: 0;
+  height: 0;
+}

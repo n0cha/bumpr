@@ -12,6 +12,9 @@
         },
         "cordova-plugin-geolocation": {
             "PACKAGE_NAME": "me.bumpr"
+        },
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "me.bumpr"
         }
     },
     "dependent_plugins": {
