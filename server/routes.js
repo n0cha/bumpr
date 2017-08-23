@@ -7,6 +7,7 @@ module.exports = function (router, db) {
 	var query = function (res, sql, values, cb) {
 		db.query(sql, values, (err, rows) => {
 			if (err) {
+				console.error(err);
 				res.json({error: true, message: 'Error executing MySQL query'});
 			} else {
 				cb(res, rows);

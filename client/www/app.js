@@ -1,6 +1,6 @@
 const apiUrl = 'http://phondr.com:3141/api/';
 var myCountry = window.localStorage.getItem('myCountry') || 'NL';
-var myLicense = getMyPlateNumberFromStorage();
+var myLicense = (window.localStorage.getItem('myPlateNumber') || '').toLocaleUpperCase();
 var myScore = 0;
 var myRank = 0;
 let selectedCountry = myCountry;
@@ -205,12 +205,6 @@ function validateInput() {
     error = 'Missing plate number';
   }
   return error;
-}
-
-function getMyPlateNumberFromStorage() {
-  const license = window.localStorage.getItem('myPlateNumber');
-  if (license) return license.toLocaleUpperCase();
-  else return false;
 }
 
 function showError(message) {

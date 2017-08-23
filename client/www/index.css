@@ -149,7 +149,7 @@ button {
   border: 3px solid black;
 }
 
-#buttons > button:hover {
+#buttons > button:active {
   background: #333;
   border-color: #eee;
   color: #eee;
@@ -194,7 +194,7 @@ button {
   padding: 0;
 }
 
-.iconButton:hover {
+.iconButton:active {
   background: #333;
   border-color: #eee;
   color: #eee;
