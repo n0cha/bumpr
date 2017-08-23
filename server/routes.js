@@ -2,6 +2,7 @@
 
 var _ = require('lodash');
 var mysql = require('mysql');
+var validators = require('./validators.json');
 
 module.exports = function (router) {
 	
@@ -41,18 +42,20 @@ module.exports = function (router) {
 		res.json({message: 'Bumpr REST API'});
 	});
 	
-	var validateLicense = function (license) {
-		return /^[A-Z0-9]{1,9}$/.test(license);
+	var validateLicense = function (license, country) {
+		const validator = validators[country] || '[A-Z0-9]{1,9}';
+		return (new RegExp(`^${validator}$`)).test(license);
 	};
 	
 	var thumbs = function (req, res, upDown) {
 		var license = req.body.license.toUpperCase();
-		if (!validateLicense(license)) {
+		var country = req.body.country.toUpperCase();
+		if (!validateLicense(license, country)) {
 			return res.json({error: true, message: 'Invalid license plate number'});
 		}
 		var sql = 'INSERT INTO points (hash, country, license, score, location_lat, location_lng) VALUES (?, ?, ?, ?, ?, ?)';
 		let location = req.body.location || {lat: null, lng: null};
-		var values = [req.body.hash.toLowerCase(), req.body.country.toUpperCase(), license, upDown ? 1 : -1, location.lat, location.lng];
+		var values = [req.body.hash.toLowerCase(), country, license, upDown ? 1 : -1, location.lat, location.lng];
 		query(res, sql, values, send);
 	};
 	
@@ -68,7 +71,7 @@ module.exports = function (router) {
 		var country = req.params.country.toUpperCase();
 		var license = req.params.license.toUpperCase();
 		
-		if (!validateLicense(license)) {
+		if (!validateLicense(license, country)) {
 			return res.json({error: true, message: 'Invalid license plate number'});
 		}
 		

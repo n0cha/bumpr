@@ -90,7 +90,7 @@ function retrieveAndSetScore() {
       })
       .then(json => {
         if (json.error) {
-          return showError(json.message);
+          return setMessage(json.message);
         }
         
         myScore = json.result.score;
@@ -152,7 +152,7 @@ function sendThumb(isUp) {
     }).then(function(response) {
       response.json().then(function(json) {
         if (json.error) {
-          showError(`Error: ${json.message}`);
+          setMessage(json.message);
         } else {
           showFeedback(thumb);
           sounds[thumb].play();
