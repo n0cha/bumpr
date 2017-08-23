@@ -1,17 +1,35 @@
 "use strict";
 
 var _ = require('lodash');
+var mysql = require('mysql');
 
-module.exports = function (router, db) {
+module.exports = function (router) {
 	
+	var pool = mysql.createPool({
+		connectionLimit: 100,
+		host: 'db.phondr.com',
+		user: 'bumpr_user',
+		password: 'FanaticalCouncilman',
+		database: 'bumpr',
+		debug: false
+	});
+			
 	var query = function (res, sql, values, cb) {
-		db.query(sql, values, (err, rows) => {
+		pool.getConnection((err, connection) => {
 			if (err) {
-				console.error(err);
-				res.json({error: true, message: 'Error executing MySQL query'});
-			} else {
-				cb(res, rows);
+				res.json({error: true, message: 'A database problem occurred, please try again later.'});
+				console.error('Error connecting to database:', err);
+				return;
 			}
+			
+			connection.query(sql, values, (err, rows) => {
+				if (err) {
+					console.error('Error executing query:', err);
+					res.json({error: true, message: 'A database problem occurred, please try again later.'});
+				} else {
+					cb(res, rows);
+				}
+			});
 		});
 	};
 	
