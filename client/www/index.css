@@ -132,7 +132,7 @@ button {
 
 #buttons {
   position: absolute;
-  bottom: 20vh;
+  top: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
