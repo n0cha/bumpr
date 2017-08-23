@@ -1,3 +1,7 @@
+* {
+  user-select: none;
+}
+
 body {
   margin: 0px;
   font-family: "Helvetica Neue", "Trebuchet MS", sans-serif;
@@ -15,6 +19,10 @@ h1 {
   margin: 0;
   font-size: 30px;
   vertical-align: middle;
+}
+
+button {
+  outline: none;
 }
 
 #header {
