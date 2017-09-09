@@ -429,7 +429,8 @@ button {
 
 #errorText {
   margin: 30% auto 0 auto;
-  width: 80%
+  width: 80%;
+  white-space: pre-wrap;
 }
 
 #errorMessage {

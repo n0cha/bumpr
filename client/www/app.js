@@ -22,7 +22,7 @@ var app = {
   onDeviceReady: function() {
     StatusBar.overlaysWebView(false);
     StatusBar.styleDefault();
-    loadMain();
+    testConnection(loadMain);
   },
 };
 
@@ -211,11 +211,11 @@ function validateInput() {
 }
 
 function showError(message) {
-  let text = 'You have encountered an issue that caused an error to happen. Please restart app and try again.';
+  let text = 'We have encountered an issue that caused an error to happen.\nPlease restart the app and try again.';
   let errorMessage = `Error: ${message}`;
   
   if (message === 'Failed to fetch') {
-    text = 'We couldn\'t make a connection to the server. Please make sure your internet connection is working properly.';
+    text = 'We couldn\'t make a connection to the server.\nPlease make sure your internet connection is working properly.';
     errorMessage = '';
   }
   
@@ -389,37 +389,38 @@ function showRanking(search) {
 
 function getCountry(callback) {
   getLocation(function(location) {
-    if (!location.error) {
-      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.latitude},${location.longitude}&key=AIzaSyDVqRsZXDOS1MC9BGjd_JbZXkFk1b5rOoM`).then(function(response) {
-        response.json().then(function(json) {
-          json.results[0].address_components.forEach(function(item) {
-            if (item.types[0] === 'country') {
-              let country = item.short_name;
-              
-              // Need to check both code and name, because not all license plate codes match
-              // For example Belgium is country BE and license B. Matches on Belgium instead
-              if (!countries[country]) {
-                country = _.findKey(countries, {name: item.long_name});
-              }
-              
-              if (!country) {
-                return callback({error: 'getCountry error: no match found'});
-              }
-              
-              callback(country);
-            }
-          })
-        });
-      }, function(error) {
-        callback({
-          error: `getCountry fetch error: ${error.message}`
-        })
-      });
-    } else {
+    if (location.error) {
       callback({
         error: `getLocation error: ${location.error}`
-      })
+      });
+      return;
     }
+    
+    fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.latitude},${location.longitude}&key=AIzaSyDVqRsZXDOS1MC9BGjd_JbZXkFk1b5rOoM`).then(function(response) {
+      response.json().then(function(json) {
+        json.results[0].address_components.forEach(function(item) {
+          if (item.types[0] === 'country') {
+            let country = item.short_name;
+            
+            // Need to check both code and name, because not all license plate codes match
+            // For example Belgium is country BE and license B. Matches on Belgium instead
+            if (!countries[country]) {
+              country = _.findKey(countries, {name: item.long_name});
+            }
+            
+            if (!country) {
+              return callback({error: 'getCountry error: no match found'});
+            }
+            
+            callback(country);
+          }
+        })
+      });
+    }, function(error) {
+      callback({
+        error: `getLocation error: ${location.error}`
+      });
+    });
   });
 }
 
@@ -474,4 +475,12 @@ function openSelect($select) {
   } else if (element.fireEvent) {
     $select[0].fireEvent('onmousedown');
   }
+}
+
+function testConnection(callback) {
+  fetch(apiUrl)
+      .then(callback)
+      .catch(error => {
+        showError(error.message);
+      });
 }
