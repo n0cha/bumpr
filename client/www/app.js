@@ -1,7 +1,8 @@
 const apiUrl = 'http://phondr.com:3141/api/';
 var myCountry = window.localStorage.getItem('myCountry') || 'NL';
 var myLicense = (window.localStorage.getItem('myPlateNumber') || '').toLocaleUpperCase();
-let preferredCountries = (window.localStorage.getItem('preferredCountries') || '').split(',');
+let preferredCountries = window.localStorage.getItem('preferredCountries');
+preferredCountries = preferredCountries ? preferredCountries.split(',') : [];
 var myScore = 0;
 var myRank = 0;
 let selectedCountry = myCountry;
