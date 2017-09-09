@@ -76,25 +76,26 @@ function loadMain() {
 function populateCountrySelect() {
   $('#selectCountry').empty();
   
-  const appendOption = country => {
+  const appendOption = ($group, country) => {
     const selected = (country.key === selectedCountry) ? 'selected' : '';
-    $('#selectCountry').append(`<option value="${country.key}" ${selected}>${country.name} (${country.key})</option>`);
+    $group.append(`<option value="${country.key}" ${selected}>${country.name} (${country.key})</option>`);
   };
+  
+  let $group;
   if (preferredCountries.length) {
-    $('#selectCountry').append('<optgroup>');
+    $group = $('<optgroup>').appendTo('#selectCountry');
     _.each(preferredCountries, key => {
-      appendOption(countries[key]);
+      appendOption($group, countries[key]);
     });
-    $('#selectCountry').append('</optgroup>');
   }
-  $('#selectCountry').append('<optgroup>');
+  
+  $group = $('<optgroup>').appendTo('#selectCountry');
   _.each(sortedCountries, country => {
     if (_.includes(preferredCountries, country.key)) {
       return;
     }
-    appendOption(country);
+    appendOption($group, country);
   });
-  $('#selectCountry').append('</optgroup>');
 }
 
 function preventNonAlphaNumericCharacters(event) {
