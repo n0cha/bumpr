@@ -31,8 +31,9 @@ function loadMain() {
     $('#feedback').hide();
     
     const key = window.localStorage.getItem('key');
-    if (!key || key.length !== 32) {
+    if (key === null || !key || key.length !== 32) {
       $('.main').hide();
+      $('.setup').hide();
       
       getCountry(country => {
         if (country.error) {
@@ -41,21 +42,23 @@ function loadMain() {
         
         selectedCountry = country;
         populateCountrySelect();
+        $('#plateNumber').html(createLicensePlate(selectedCountry, '', true, true));        
         $('#loader').hide();
+        $('.setup').show();
       });
     } else {
       $('.setup').hide();
       $('#loader').hide();
       setMyPlateInHeader(myLicense);
+      $('#plateNumber').html(createLicensePlate(selectedCountry, '', true, true));
       retrieveAndSetScore();
+      populateCountrySelect();      
     }
     
-    populateCountrySelect();
     $('#like').on('click', thumbsUpButtonOnclick);
     $('#dislike').on('click', thumbsDownButtonOnclick);
     $('#save').on('click', saveMySettings);
     $('#rankingButton').on('click', event => showRanking());
-    $('#plateNumber').html(createLicensePlate(selectedCountry, '', true, true));
     $('#selectCountry').on('change', event => {
       selectedCountry = $(event.target).val();
       $('#plateNumber').html(createLicensePlate(selectedCountry, '', true, true));
