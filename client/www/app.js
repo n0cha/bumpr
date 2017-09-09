@@ -1,6 +1,7 @@
 const apiUrl = 'http://phondr.com:3141/api/';
 var myCountry = window.localStorage.getItem('myCountry') || 'NL';
 var myLicense = (window.localStorage.getItem('myPlateNumber') || '').toLocaleUpperCase();
+let preferredCountries = (window.localStorage.getItem('preferredCountries') || '').split(',');
 var myScore = 0;
 var myRank = 0;
 let selectedCountry = myCountry;
@@ -10,8 +11,11 @@ const sounds = {
 };
 
 let countries;
+let sortedCountries;
+
 $.getJSON('static/countries.json', c => {
   countries = c;
+  sortedCountries = _(countries).map((country, key) => Object.assign(country, {key})).sortBy(country => _.deburr(country.name)).value();
 });
 
 var app = {
@@ -59,6 +63,7 @@ function loadMain() {
     $('#dislike').on('click', thumbsDownButtonOnclick);
     $('#save').on('click', saveMySettings);
     $('#rankingButton').on('click', event => showRanking());
+    $('#settingsButton').on('click', event => showSettings());
     $('#selectCountry').on('change', event => {
       selectedCountry = $(event.target).val();
       $('#plateNumber').html(createLicensePlate(selectedCountry, '', true, true));
@@ -69,10 +74,27 @@ function loadMain() {
 }
 
 function populateCountrySelect() {
-  _(countries).map((country, key) => Object.assign(country, {key})).sortBy('name').each(country => {
+  $('#selectCountry').empty();
+  
+  const appendOption = country => {
     const selected = (country.key === selectedCountry) ? 'selected' : '';
     $('#selectCountry').append(`<option value="${country.key}" ${selected}>${country.name} (${country.key})</option>`);
+  };
+  if (preferredCountries.length) {
+    $('#selectCountry').append('<optgroup>');
+    _.each(preferredCountries, key => {
+      appendOption(countries[key]);
+    });
+    $('#selectCountry').append('</optgroup>');
+  }
+  $('#selectCountry').append('<optgroup>');
+  _.each(sortedCountries, country => {
+    if (_.includes(preferredCountries, country.key)) {
+      return;
+    }
+    appendOption(country);
   });
+  $('#selectCountry').append('</optgroup>');
 }
 
 function preventNonAlphaNumericCharacters(event) {
@@ -193,6 +215,7 @@ function saveMySettings() {
   window.localStorage.setItem('myPlateNumber', myLicense);
   window.localStorage.setItem('myCountry', myCountry);
   window.localStorage.setItem('key', generateKey());
+  window.localStorage.setItem('preferredCountries', [myCountry]);
   
   loadMain();
 }
@@ -328,6 +351,27 @@ function drawRankingTable(top10, bottom10, searchData) {
   // }
 }
 
+function showSettings() {
+  $('#content').load('settings.html', () => {
+    $('.back').on('click', loadMain);
+    const $table = $('#countries');
+    _.each(sortedCountries, country => {
+      const checked = _.includes(preferredCountries, country.key) ? 'checked' : '';
+      $table.append(`<tr><td><input id="preferred_${country.key}" type="checkbox" value="${country.key}" ${checked}></td><td><label for="preferred_${country.key}">${country.name}</label></td></tr>`);
+    });
+    $('td > input[type="checkbox"]').on('change', event => {
+      if (event.target.checked) {
+        preferredCountries.push(event.target.value);
+        preferredCountries = _.uniq(preferredCountries);
+      } else {
+        preferredCountries = _.without(preferredCountries, event.target.value);
+      }
+      window.localStorage.setItem('preferredCountries', preferredCountries);
+      populateCountrySelect();
+    });
+  });
+}
+
 function showRanking(search) {
   let requests = [
     new Promise((resolve) => {
@@ -345,7 +389,7 @@ function showRanking(search) {
   
   Promise.all(requests)
       .then(responses => {
-        $('#back').on('click', loadMain);
+        $('.back').on('click', loadMain);
         $('#searchButton').on('click', () => {
           $('#searchContainer').toggleClass('_hidden');
           $('#searchInput input').focus();
