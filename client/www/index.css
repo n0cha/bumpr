@@ -213,24 +213,43 @@ button {
   position: absolute;
 }
 
-#searchInput {
-  right: 42px;
+#searchContainer {
+  right: 39px;
   position: absolute;
-  top: 4px;
+  top: 0;
   background: inherit;
-  width: 190px;
+  width: 231px;
   transition: all 0.25s ease-in-out;
   overflow: hidden;
   text-align: right;
+  height: 42px;
+}
+
+#searchContainer > * {
+  display: inline-block;
+}
+
+#searchContainer._hidden {
+  width: 0;
+}
+
+#searchGo {
+  margin: 0;
+  vertical-align: top;
+  position: absolute;
+  left: 194px;
+  top: 4px;
+}
+
+#searchInput {
+  position: absolute;
+  left: 0px;
+  top: 4px;
 }
 
 #searchInput > input {
   width: 160px;
   font-size: 19px;
-}
-
-#searchInput._hidden {
-  width: 0;
 }
 
 #rankingTable td {

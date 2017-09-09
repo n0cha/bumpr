@@ -340,18 +340,24 @@ function showRanking(search) {
       .then(responses => {
         $('#back').on('click', loadMain);
         $('#searchButton').on('click', () => {
-          $('#searchInput').toggleClass('_hidden');
+          $('#searchContainer').toggleClass('_hidden');
           $('#searchInput input').focus();
           $('#rankingTitle h1').toggleClass('_hidden');
         });
         $('#searchInput').html(createLicensePlate(selectedCountry, '', true));
+        
+        var doSearch = () => {
+          $('#searchContainer').addClass('_hidden');
+          $('#rankingTitle h1').removeClass('_hidden');
+          showRanking($('#searchInput input').val());
+        };
+        
         $('#searchInput input').on('keypress', event => {
           if (event.keyCode === 13) {
-            $('#searchInput').addClass('_hidden');
-            $('#rankingTitle h1').removeClass('_hidden');
-            showRanking($('#searchInput input').val());
+            doSearch();
           }
         });
+        $('#searchGo').on('click', doSearch);
         
         let responseData = [
           responses[1].json(),
@@ -442,7 +448,7 @@ function createLicensePlate(country, license, isInput, isLarge) {
   }
   
   const licensePart = isInput ?
-      `<input maxlength="9" placeholder="A1234BC" style="${inputStyle}">${license}</input>` :
+      `<input maxlength="9" placeholder="A1234BC" style="${inputStyle}" onfocus="javascript:$(this).attr('placeholder', '')" onblur="javascript:$(this).attr('placeholder', 'A1234BC')">${license}</input>` :
       `<span>${license}</span>`;
   
   return `

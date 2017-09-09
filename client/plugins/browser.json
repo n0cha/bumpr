@@ -7,10 +7,10 @@
         "files": {}
     },
     "installed_plugins": {
-        "cordova-plugin-statusbar": {
+        "cordova-plugin-geolocation": {
             "PACKAGE_NAME": "me.bumpr"
         },
-        "cordova-plugin-geolocation": {
+        "cordova-plugin-statusbar": {
             "PACKAGE_NAME": "me.bumpr"
         },
         "cordova-plugin-whitelist": {
