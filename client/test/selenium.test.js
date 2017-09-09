@@ -74,7 +74,7 @@ test.describe('Bumpr', function tests() {
   }); 
 
   test.after(() => {
-    browser.quit();
+    // browser.quit();
   });
 });
 
@@ -82,5 +82,7 @@ function constructBrowser() {
   chrome.setDefaultService(new chrome.ServiceBuilder(chromedriver.path).build());
   const options = new chrome.Options();
   const capabilities = options.toCapabilities(webdriver.Capabilities.chrome());
-  return new webdriver.Builder().withCapabilities(capabilities).build();
+  const driver = new webdriver.Builder().withCapabilities(capabilities).build();
+  driver.manage().window().setSize(375, 667);
+  return driver;
 }

@@ -10,7 +10,7 @@ module.exports = function PopupPageObject(options) {
   return {
     open: (page = 'main') => {
       if (page === 'main') browser.get(`http://localhost:3000/`);
-      if (page === 'ranking') browser.findElement(By.id('rankingButton')).click();
+      if (page === 'ranking') waitForVisible(By.id('rankingButton'), (el) => el.click());
     },
     close: (page) => {
       if (page === 'ranking') browser.findElement(By.id('back')).click();
