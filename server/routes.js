@@ -24,6 +24,7 @@ module.exports = function (router) {
 			}
 			
 			connection.query(sql, values, (err, rows) => {
+				connection.release();
 				if (err) {
 					console.error('Error executing query:', err);
 					res.json({error: true, message: 'A database problem occurred, please try again later.'});
