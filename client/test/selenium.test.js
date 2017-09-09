@@ -74,7 +74,7 @@ test.describe('Bumpr', function tests() {
   }); 
 
   test.after(() => {
-    // browser.quit();
+    browser.quit();
   });
 });
 

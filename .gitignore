@@ -4,6 +4,7 @@
 # runTime for PhoneGap
 client/platforms
 client/node_modules
+client/pkg
 
 server/node_modules
 client.zip
