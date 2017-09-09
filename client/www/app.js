@@ -28,12 +28,13 @@ var app = {
     StatusBar.overlaysWebView(false);
     StatusBar.styleDefault();
     testConnection(loadMain);
-  },
+  }
 };
 
 function loadMain() {
   $('#content').load('main.html', () => {
     $('#feedback').hide();
+    $(document).off('backbutton');
     
     const key = window.localStorage.getItem('key');
     if (key === null || !key || key.length !== 32) {
@@ -64,7 +65,7 @@ function loadMain() {
     $('#dislike').on('click', thumbsDownButtonOnclick);
     $('#save').on('click', saveMySettings);
     $('#rankingButton').on('click', event => showRanking());
-    $('#settingsButton').on('click', event => showSettings());
+    $('#settingsButton').on('click', showSettings);
     $('#selectCountry').on('change', event => {
       selectedCountry = $(event.target).val();
       $('#plateNumber').html(createLicensePlate(selectedCountry, '', true, true));
@@ -355,6 +356,7 @@ function drawRankingTable(top10, bottom10, searchData) {
 
 function showSettings() {
   $('#content').load('settings.html', () => {
+    $(document).on('backbutton', loadMain);
     $('.back').on('click', loadMain);
     const $table = $('#countries');
     _.each(sortedCountries, country => {
@@ -391,6 +393,7 @@ function showRanking(search) {
   
   Promise.all(requests)
       .then(responses => {
+        $(document).on('backbutton', loadMain);
         $('.back').on('click', loadMain);
         $('#searchButton').on('click', () => {
           $('#searchContainer').toggleClass('_hidden');
