@@ -106,7 +106,7 @@ function retrieveAndSetScore() {
         document.getElementById('rank').innerHTML = String(myRank);
       })
       .catch(error => {
-        showError(error);
+        showError(error.message);
       });
 }
 
@@ -211,22 +211,26 @@ function validateInput() {
 }
 
 function showError(message) {
-  let errorView =  $('<div/>').attr("id", "error").addClass("error");
-  let text = $('<div/>').attr("id", "errorText").text('You have encountered an issue that caused an error to happen. Please restart app and try again...');
-  let icon = $('<i/>').attr("id", "errorIcon").attr('aria-hidden', true).addClass('fa fa-exclamation-triangle fa-3x');
-  let closeBtn = $('<i/>').attr("id", "errorClose").attr('aria-hidden', true).addClass('fa fa-times fa-3x');
-  let messageSpan = $('<div/>').attr("id", "errorMessage").text(`Error: ${message}`);
+  let text = 'You have encountered an issue that caused an error to happen. Please restart app and try again.';
+  let errorMessage = `Error: ${message}`;
   
-  errorView.append(icon);
-  errorView.append(text);
-  errorView.append(messageSpan);
-  errorView.append(closeBtn);
+  if (message === 'Failed to fetch') {
+    text = 'We couldn\'t make a connection to the server. Please make sure your internet connection is working properly.';
+    errorMessage = '';
+  }
   
-  closeBtn.on('click', function() {
-    errorView.remove();
+  $.get('error.html', html => {
+    const $errorView = $(html);
+  
+    $errorView.find('#errorText').text(text);
+    $errorView.find('#errorMessage').text(errorMessage);
+    $errorView.find('#errorClose').on('click', function() {
+      $errorView.remove();
+      loadMain();
+    });
+    
+    $('body').append($errorView);
   });
-  
-  $('body').append(errorView);
 }
 
 function setMessage(message) {
