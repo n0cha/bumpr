@@ -101,6 +101,40 @@ test.describe('Bumpr', function tests() {
     });
   });
 
+  test.describe('Settings screen', () => {    
+    test.it('Can select prefered countries', (done) => {
+      app.open(() => {
+        app.getCountryListTop(1, (countries) => {
+          assert.equal(countries[0], 'Netherlands (NL)');
+          app.openSettings(() => {
+            app.selectPreferredCountries(['NL', 'B', 'D', 'PL'], () => {
+              app.open(() => {
+                app.getCountryListTop(4, (countries) => {
+                  assert.equal(countries[0], 'Belgium (B)');
+                  assert.equal(countries[1], 'Germany (D)');
+                  assert.equal(countries[2], 'Poland (PL)');
+                  assert.equal(countries[3], 'Afghanistan (AFG)');
+                  done();
+                }); 
+              });
+            });
+          });          
+        });
+      });
+    });
+
+    test.it('Can go back to main screen', (done) => {
+      app.openSettings(() => {
+        app.close();
+        app.thumbsDown();
+        app.getMessage((message) => {
+          assert.equal(message, 'Missing plate number');
+          done();
+        });
+      });
+    });
+  });
+
   test.after(() => {
     browser.quit();
   });

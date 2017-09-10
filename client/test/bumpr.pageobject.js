@@ -7,6 +7,8 @@ module.exports = function PopupPageObject(options) {
   if (!options.browser) throw Error('options.browser is required');
   const browser = options.browser;
 
+  const backButton = By.css('.back');
+
   return {
     open: (callback) => {
       browser.get(`http://localhost:3000/`);
@@ -17,8 +19,16 @@ module.exports = function PopupPageObject(options) {
     openRanking: () => {
       waitForVisible(By.id('rankingButton'), (el) => el.click());
     },
+    openSettings: (callback) => {
+      waitForVisible(By.id('settingsButton'), (el) => {
+        el.click();
+        waitForVisible(backButton, () => {
+          callback();          
+        })
+      });
+    },
     close: () => {
-      browser.findElement(By.css('.back')).click();
+      browser.findElement(backButton).click();
     },    
     save: (callback) => {
       browser.findElement(By.id('save')).click();
@@ -39,6 +49,23 @@ module.exports = function PopupPageObject(options) {
           zIndex(select, -1);
           callback();
         });
+      });
+    },
+    getCountryListTop: (top, callback) => {
+      browser.wait(Until.elementsLocated(By.css(`#selectCountry option`)), 30000).then((options) => {
+        getTextOfElements(options.slice(0, top), callback);
+      });    
+    },
+    selectPreferredCountries: (countries, callback) => {
+      let itemsProcessed = 0;
+      countries.forEach((code) => {
+        const checkbox = browser.findElement(By.css(`input[value='${code}']`));
+        browser.executeScript('arguments[0].scrollIntoView({block: "center"});', checkbox);
+        checkbox.click();
+        itemsProcessed++;
+        if (itemsProcessed === countries.length) {
+          callback();
+        }        
       });
     },
     getScore: (callback) => {
@@ -67,7 +94,7 @@ module.exports = function PopupPageObject(options) {
         el.getText().then((text) => {
           callback(text);          
         });
-      });
+      }, 30000);
     },
     search: (inputText, callback) => {
       waitForVisible(By.id('searchButton'), (btn) => {
@@ -125,6 +152,17 @@ module.exports = function PopupPageObject(options) {
 
   function zIndex(el, index) {
     browser.executeScript(`arguments[0].style.zIndex='${index}';`, el);    
+  };
+
+  function getTextOfElements(elements, callback, result = []) {
+    if (elements.length <= 0) {      
+      callback(result);
+      return;
+    }
+    elements[0].getText().then((text) => {
+      result.push(text);
+      getTextOfElements(elements.splice(1, elements.length), callback, result);
+    });
   };
 
   function sleep(ms) {
