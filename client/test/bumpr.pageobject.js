@@ -8,18 +8,21 @@ module.exports = function PopupPageObject(options) {
   const browser = options.browser;
 
   return {
-    open: (page = 'main') => {
-      if (page === 'main') {
-        browser.get(`http://localhost:3000/`);
-        waitForHidden(By.id('loader'), () => {}, 60000);
-      }
-      if (page === 'ranking') waitForVisible(By.id('rankingButton'), (el) => el.click());
+    open: (callback) => {
+      browser.get(`http://localhost:3000/`);
+      waitForHidden(By.id('loader'), () => {
+        callback();
+      }, 60000);
     },
-    close: (page) => {
-      if (page === 'ranking') browser.findElement(By.css('.back')).click();
+    openRanking: () => {
+      waitForVisible(By.id('rankingButton'), (el) => el.click());
+    },
+    close: () => {
+      browser.findElement(By.css('.back')).click();
     },    
-    save: () => {
+    save: (callback) => {
       browser.findElement(By.id('save')).click();
+      callback()
     },
     thumbsUp: () => {
       browser.findElement(By.id('like')).click();      
@@ -27,13 +30,14 @@ module.exports = function PopupPageObject(options) {
     thumbsDown: () => {
       browser.findElement(By.id('dislike')).click();      
     },
-    selectCountry: (country) => {
+    selectCountry: (country, callback) => {
       const option = By.css(`#selectCountry option[value='${country}']`);
-      browser.wait(Until.elementLocated(By.id('selectCountry')), 30000).then((select) => {
+      waitForPresent(By.id('selectCountry'), (select) => {
         zIndex(select, 9999);
         browser.wait(Until.elementsLocated(option), 30000).then((options) => {
           options[0].click();
           zIndex(select, -1);
+          callback();
         });
       });
     },

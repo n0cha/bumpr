@@ -70,9 +70,8 @@ function loadMain() {
     $('#selectCountry').on('change', event => {
       selectedCountry = $(event.target).val();
       $('#plateNumber').html(createLicensePlate(selectedCountry, '', true, true));
-      $('#searchInput').html(createLicensePlate(selectedCountry, '', true));
     });
-    $('input').on('keypress', preventNonAlphaNumericCharacters);
+    $('#plateNumber input').on('keypress', preventNonAlphaNumericCharacters);
   });
 }
 
@@ -406,6 +405,7 @@ function showRanking(search) {
           $('.screenTitle h1').toggleClass('_hidden');
         });
         $('#searchInput').html(createLicensePlate(selectedCountry, '', true));
+        $('#searchInput input').on('keypress', preventNonAlphaNumericCharacters);
         
         var doSearch = () => {
           $('#searchContainer').addClass('_hidden');
