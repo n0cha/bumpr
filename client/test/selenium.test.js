@@ -18,19 +18,21 @@ test.describe('Bumpr', function tests() {
     test.it('User needs to use a valid license', (done) => {
       app.open(() => {
         app.selectCountry(MY_COUNTRY, () => {
-          app.fillPlateNumber(INVALID_LICENSE);
-          app.save(() => {
-            app.getMessage((message) => {
-              assert.equal(message, 'Invalid license plate number');
-              done();              
-            })
+          app.fillPlateNumber(INVALID_LICENSE, () => {
+            app.save(() => {
+              app.getMessage((message) => {
+                assert.equal(message, 'Invalid license plate number');
+                done();              
+              });
+            });            
           });
         });
       });
     });   
     test.it('New user can sign up', (done) => {
-      app.fillPlateNumber(MY_LICENSE);
-      app.save(done);
+      app.fillPlateNumber(MY_LICENSE, () => {
+        app.save(done)
+      });
     });
   });
 
