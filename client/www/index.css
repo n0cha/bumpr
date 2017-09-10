@@ -59,9 +59,8 @@ button {
   position: absolute;
   left: 0;
   right: 0;
-  top: 0;
+  top: 48px;
   bottom: 0;
-  padding-top: 48px;
 }
 
 #main {
@@ -178,6 +177,7 @@ button {
   background: #ddd;
   width: 100%;
   z-index: 1;
+  position: fixed;
 }
 
 .screenTitle h1 {
@@ -186,6 +186,13 @@ button {
 
 .screenTitle h1._hidden {
   opacity: 0;
+}
+
+.screenContent {
+  position: absolute;
+  top: 42px;
+  left: 0;
+  right: 0;
 }
 
 .iconButton {

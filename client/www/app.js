@@ -13,6 +13,7 @@ const sounds = {
 
 let countries;
 let sortedCountries;
+let speechRecognitionPhase;
 
 $.getJSON('static/countries.json', c => {
   countries = c;
@@ -35,7 +36,7 @@ function loadMain() {
   $('#content').load('main.html', () => {
     $('#feedback').hide();
     $(document).off('backbutton');
-    
+  
     const key = window.localStorage.getItem('key');
     if (key === null || !key || key.length !== 32) {
       $('.main').hide();
@@ -58,7 +59,7 @@ function loadMain() {
       setMyPlateInHeader(myLicense);
       $('#plateNumber').html(createLicensePlate(selectedCountry, '', true, true));
       retrieveAndSetScore();
-      populateCountrySelect();      
+      populateCountrySelect();
     }
     
     $('#like').on('click', thumbsUpButtonOnclick);
@@ -118,7 +119,7 @@ function retrieveAndSetScore() {
       })
       .then(json => {
         if (json.error) {
-          return setMessage(json.message);
+          return showMessage(json.message);
         }
         
         myScore = json.result.score;
@@ -142,19 +143,19 @@ function calculateScore(score) {
 function thumbsUpButtonOnclick() {
   const validatationError = validateInput();
   if (!validatationError) sendThumb(true);
-  else setMessage(validatationError);
+  else showMessage(validatationError);
 }
 
 function thumbsDownButtonOnclick() {
   const validatationError = validateInput();
   if (!validatationError) sendThumb(false);
-  else setMessage(validatationError);
+  else showMessage(validatationError);
 }
 
 function sendThumb(isUp) {
   const license = $('#plateNumber input').val();
   if (license.toLocaleUpperCase() === myLicense && selectedCountry === myCountry) {
-    setMessage('Personal feedback?!?');
+    showMessage('Personal feedback?!?');
     return;
   }
   
@@ -180,11 +181,11 @@ function sendThumb(isUp) {
     }).then(function(response) {
       response.json().then(function(json) {
         if (json.error) {
-          setMessage(json.message);
+          showMessage(json.message);
         } else {
           showFeedback(thumb);
           sounds[thumb].play();
-          setMessage('Thanks for the feedback!');
+          showMessage('Thanks for the feedback!');
           retrieveAndSetScore();
         }
       });
@@ -209,7 +210,7 @@ function saveMySettings() {
   const license = $('#plateNumber input').val();
   
   if (license.length < 1 || license.length > 9) {
-    return setMessage('Type a license');
+    return showMessage('Type a license');
   }
   
   myCountry = selectedCountry;
@@ -259,8 +260,12 @@ function showError(message) {
   });
 }
 
-function setMessage(message) {
+function showMessage(message) {
   $('#message').text(message).show();
+}
+
+function hideMessage() {
+  $('#message').text('').hide();
 }
 
 function setMyPlateInHeader() {
@@ -398,7 +403,7 @@ function showRanking(search) {
         $('#searchButton').on('click', () => {
           $('#searchContainer').toggleClass('_hidden');
           $('#searchInput input').focus();
-          $('#rankingTitle h1').toggleClass('_hidden');
+          $('.screenTitle h1').toggleClass('_hidden');
         });
         $('#searchInput').html(createLicensePlate(selectedCountry, '', true));
         
