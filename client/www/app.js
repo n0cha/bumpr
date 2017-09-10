@@ -365,7 +365,7 @@ function showSettings() {
     const $table = $('#countries');
     _.each(sortedCountries, country => {
       const checked = _.includes(preferredCountries, country.key) ? 'checked' : '';
-      $table.append(`<tr><td><input id="preferred_${country.key}" type="checkbox" value="${country.key}" ${checked}></td><td><label for="preferred_${country.key}">${country.name}</label></td></tr>`);
+      $table.append(`<tr><td><input id="preferred_${country.key}" type="checkbox" value="${country.key}" ${checked}></td><td><label for="preferred_${country.key}">${country.name} (${country.key})</label></td></tr>`);
     });
     $('td > input[type="checkbox"]').on('change', event => {
       if (event.target.checked) {
