@@ -13,7 +13,8 @@ const sounds = {
 
 let countries;
 let sortedCountries;
-let speechRecognitionPhase;
+
+window.onerror = alert;
 
 $.getJSON('static/countries.json', c => {
   countries = c;
@@ -28,6 +29,18 @@ var app = {
   onDeviceReady: function() {
     StatusBar.overlaysWebView(false);
     StatusBar.styleDefault();
+    $('#menuButton').on('click', () => {
+      const $menu = $('#menu');
+      if ($menu.height()) {
+        $menu.css({height: 0});
+      } else {
+        $menu.css({height: 68});
+      }
+    });
+    $('.menuOption').on('click', event => {
+      $('#menu').css({height: 0});
+      window[`show${$(event.target).attr('data-screen')}`]();
+    });
     testConnection(loadMain);
   }
 };
@@ -65,8 +78,17 @@ function loadMain() {
     $('#like').on('click', thumbsUpButtonOnclick);
     $('#dislike').on('click', thumbsDownButtonOnclick);
     $('#save').on('click', saveNewAccount);
-    $('#rankingButton').on('click', event => showRanking());
-    $('#settingsButton').on('click', showSettings);
+    Speech.check(isAvailable => {
+      if (isAvailable) {
+        $('#speechToggle').on('click', () => {
+          Speech.toggle();
+        });
+      } else {
+        $('#speechToggle').hide();
+      }
+    });
+    $('#rankContainer').on('click', event => showRanking());
+    $('#logo').on('click', showSettings);
     $('#selectCountry').on('change', event => {
       selectedCountry = $(event.target).val();
       $('#plateNumber').html(createLicensePlate(selectedCountry, '', true, true));
@@ -277,6 +299,7 @@ function showError(message) {
 
 function showMessage(message) {
   $('#message').text(message).show();
+  setTimeout(hideMessage, 10000);
 }
 
 function hideMessage() {

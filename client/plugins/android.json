@@ -10,13 +10,13 @@
         "cordova-plugin-geolocation": {
             "PACKAGE_NAME": "me.bumpr"
         },
+        "cordova-plugin-speechrecognition": {
+            "PACKAGE_NAME": "me.bumpr"
+        },
         "cordova-plugin-statusbar": {
             "PACKAGE_NAME": "me.bumpr"
         },
         "cordova-plugin-whitelist": {
-            "PACKAGE_NAME": "me.bumpr"
-        },
-        "cordova-plugin-speechrecognition": {
             "PACKAGE_NAME": "me.bumpr"
         }
     },

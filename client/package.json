@@ -1,25 +1,39 @@
 {
-  "name": "bumpr",
-  "version": "0.0.1",
-  "dependencies": {
-    "cordova-plugin-geolocation": "^2.4.3",
-    "cordova-plugin-statusbar": "^2.2.3",
-    "cordova-plugin-compat": "^1.1.0"
-  },
-  "devDependencies": {
-    "chromedriver": "^2.32.2",
-    "jake": "^8.0.15",
-    "mocha": "^3.5.0",
-    "selenium-webdriver": "^3.5.0"
-  },
-  "scripts": {
-    "jake": "jake",
-    "test": "jake test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://bitbucket.org/nreijmersdal/bumpr.git"
-  },
-  "author": "Usersdal",
-  "license": "UNLICENSED"
+    "name": "bumpr",
+    "version": "0.0.1",
+    "dependencies": {
+        "cordova-android": "^6.2.3",
+        "cordova-plugin-compat": "^1.1.0",
+        "cordova-plugin-geolocation": "~2.4.3",
+        "cordova-plugin-speechrecognition": "^1.1.2",
+        "cordova-plugin-statusbar": "~2.2.3",
+        "cordova-plugin-whitelist": "1"
+    },
+    "devDependencies": {
+        "chromedriver": "^2.32.2",
+        "jake": "^8.0.15",
+        "mocha": "^3.5.0",
+        "selenium-webdriver": "^3.5.0"
+    },
+    "scripts": {
+        "jake": "jake",
+        "test": "jake test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://bitbucket.org/nreijmersdal/bumpr.git"
+    },
+    "author": "Usersdal",
+    "license": "UNLICENSED",
+    "cordova": {
+        "plugins": {
+            "cordova-plugin-speechrecognition": {},
+            "cordova-plugin-geolocation": {},
+            "cordova-plugin-statusbar": {},
+            "cordova-plugin-whitelist": {}
+        },
+        "platforms": [
+            "android"
+        ]
+    }
 }

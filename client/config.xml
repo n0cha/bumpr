@@ -37,8 +37,9 @@
         <icon density="xxhdpi" src="icon/android/mipmap-xxhdpi/ic_launcher.png" />
         <icon density="xxxhdpi" src="icon/android/mipmap-xxxhdpi/ic_launcher.png" />
     </platform>
-    <plugin name="cordova-plugin-statusbar" spec="~2.2.3" />
     <preference name="StatusBarOverlaysWebView" value="false" />
     <plugin name="cordova-plugin-geolocation" spec="~2.4.3" />
+    <plugin name="cordova-plugin-speechrecognition" spec="^1.1.2" />
+    <plugin name="cordova-plugin-statusbar" spec="~2.2.3" />
     <plugin name="cordova-plugin-whitelist" spec="1" />
 </widget>

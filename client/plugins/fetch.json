@@ -30,5 +30,13 @@
         },
         "is_top_level": true,
         "variables": {}
+    },
+    "cordova-plugin-speechrecognition": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-speechrecognition"
+        },
+        "is_top_level": true,
+        "variables": {}
     }
 }
