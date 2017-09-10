@@ -14,7 +14,7 @@ const sounds = {
 let countries;
 let sortedCountries;
 
-window.onerror = alert;
+window.onerror = showError;
 
 $.getJSON('static/countries.json', c => {
   countries = c;
