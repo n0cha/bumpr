@@ -432,6 +432,7 @@ function showRanking(search) {
         return Promise.all(responseData);
       })
       .then(data => {
+        if (data[2] && data[2].error) search = false;
         drawRankingTable(data[0].result, data[1].result, search && {
               country: selectedCountry.toLocaleUpperCase(),
               license: search.toLocaleUpperCase(),

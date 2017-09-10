@@ -9,18 +9,21 @@ const app = require('./bumpr.pageobject.js')({ browser });
 
 test.describe('Bumpr', function tests() {
   this.timeout(120000);
-  const TEST_LICENSE = 'TEST123';
+  const TEST_LICENSE = 'TST123';
+  const INVALID_LICENSE = 'TEST12';
   const MY_LICENSE = '12ab34';
+  const MY_COUNTRY = 'NL';
 
   test.it('New user sign up', () => {
     app.open();
+    app.selectCountry(MY_COUNTRY);
     app.fillPlateNumber(MY_LICENSE);
     app.save();
   });
 
   test.it('Shows my license in the header', () => {
     app.getMyLicense((license) => {
-      assert.equal(license, MY_LICENSE.toLocaleUpperCase());  
+      assert.equal(license, MY_COUNTRY + MY_LICENSE.toLocaleUpperCase());  
     });
   });
 
@@ -37,6 +40,7 @@ test.describe('Bumpr', function tests() {
   });
 
   test.it('Can give thumbsup', (done) => {
+    app.open();        
     app.fillPlateNumber(TEST_LICENSE);
     app.thumbsUp();
     app.getMessage((message) => {
@@ -63,6 +67,13 @@ test.describe('Bumpr', function tests() {
       done();
     });
   });
+
+  test.it('Search for invalid license', (done) => {
+    app.search(INVALID_LICENSE, (rank) => {
+      assert.equal(rank , false);
+      done();
+    });
+  });  
 
   test.it('Can go back to main screen', (done) => {
     app.close('ranking');

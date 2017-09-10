@@ -9,11 +9,14 @@ module.exports = function PopupPageObject(options) {
 
   return {
     open: (page = 'main') => {
-      if (page === 'main') browser.get(`http://localhost:3000/`);
+      if (page === 'main') {
+        browser.get(`http://localhost:3000/`);
+        waitForHidden(By.id('loader'), () => {}, 60000);
+      }
       if (page === 'ranking') waitForVisible(By.id('rankingButton'), (el) => el.click());
     },
     close: (page) => {
-      if (page === 'ranking') browser.findElement(By.id('back')).click();
+      if (page === 'ranking') browser.findElement(By.css('.back')).click();
     },    
     save: () => {
       browser.findElement(By.id('save')).click();
@@ -23,6 +26,16 @@ module.exports = function PopupPageObject(options) {
     },
     thumbsDown: () => {
       browser.findElement(By.id('dislike')).click();      
+    },
+    selectCountry: (country) => {
+      const option = By.css(`#selectCountry option[value='${country}']`);
+      browser.wait(Until.elementLocated(By.id('selectCountry')), 30000).then((select) => {
+        zIndex(select, 9999);
+        browser.wait(Until.elementsLocated(option), 30000).then((options) => {
+          options[0].click();
+          zIndex(select, -1);
+        });
+      });
     },
     getScore: (callback) => {
       waitForVisible(By.id('score'), (el) => {
@@ -40,12 +53,10 @@ module.exports = function PopupPageObject(options) {
     },
     getMyLicense: (callback) => {
       waitForVisible(By.id('me'), (el) => {
-        el.findElements(By.tagName('span')).then((els) => {
-          els[1].getText().then((text) => {
+          el.getText().then((text) => {
             callback(text);          
           });
         });
-      });
     },
     getMessage: (callback) => {
       waitForVisible(By.id('message'), (el) => {
@@ -55,20 +66,26 @@ module.exports = function PopupPageObject(options) {
       });
     },
     search: (inputText, callback) => {
-      waitForVisible(By.id('searchButton'), (el) => {
-        sleep(500).then(() => { // wait until onclick handler is bound
-          el.click();          
-          sleep(500).then(() => { // wait until animation is finished
-            browser.findElement(By.css('#searchInput input')).sendKeys(inputText + webdriver.Key.ENTER).then(() => {
-              waitForVisible(By.css('tr.search'), (row) => {
-                row.findElements(By.tagName('td')).then((tds) => {
-                  tds[1].getText().then((text) => {
-                    callback(text);          
+      waitForVisible(By.id('searchButton'), (btn) => {
+        sleep(500).then(() => { // wait for onclick handler to bind
+          btn.click();
+          sleep(500).then(() => { // wait for animation
+            waitForVisible(By.css('#searchInput input'), (input) => {
+              input.sendKeys(inputText + webdriver.Key.ENTER).then(() => {
+                waitForVisible(By.id('rankingTable'), (table) => {
+                  table.findElement(By.css('tr.search')).then((row) => {
+                    row.findElements(By.tagName('td')).then((tds) => {
+                      tds[1].getText().then((rank) => {
+                        callback(rank);          
+                      });
+                    });                
+                  }).catch(() => {
+                    callback(false);                  
                   });
-                })                
-              })
+                });
+              });
             });
-          });
+          });    
         });
       });
     },
@@ -80,12 +97,30 @@ module.exports = function PopupPageObject(options) {
     },
   }
 
-  function waitForVisible(locator, callback, timeout = 30000) {
-    browser.wait(Until.elementLocated(locator), timeout).then((found) => {
+  function waitForVisible(locator, callback, timeout = 5000) {
+    waitForPresent(locator, (found) => {
       browser.wait(Until.elementIsVisible(found), timeout).then((el) =>{
         callback(el)
       });
+    }, timeout)
+  };
+
+  function waitForPresent(locator, callback, timeout = 5000) {
+    browser.wait(Until.elementLocated(locator), timeout).then((found) => {
+      callback(found)      
     });    
+  };
+
+  function waitForHidden(locator, callback, timeout = 5000) {
+    waitForPresent(locator, (found) => {
+      browser.wait(Until.elementIsNotVisible(found), timeout).then((el) =>{
+        callback(el)
+      });
+    }, timeout)      
+  }
+
+  function zIndex(el, index) {
+    browser.executeScript(`arguments[0].style.zIndex='${index}';`, el);    
   };
 
   function sleep(ms) {
