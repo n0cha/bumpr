@@ -48,7 +48,6 @@ const Speech = {
 	},
 	
 	toggle() {
-		console.log('TOGGLE');
 		if (this._phase) {
 			this._phase = 0;
 		} else {
@@ -59,7 +58,6 @@ const Speech = {
 	},
 	
 	nextPhase() {
-		console.log('NEXTPHASE');
 		this._phase++;
 		if (this._phase > 2) {
 			this.toggle();
@@ -67,7 +65,6 @@ const Speech = {
 	},
 	
 	start() {
-		console.log('START', this._phase);
 		switch(this._phase) {
 			case 1:
 				showMessage('Listening, please speak license plate number.');
@@ -90,21 +87,19 @@ const Speech = {
 			const recognition = new window[this._html5Class]();
 			recognition.lang = language;
 			recognition.onresult = event => {
-				console.log('ONRESULT');
 				let transcript = event.results[0][0].transcript;
-				console.log(transcript);
 				this.parse(transcript);
 			};
 			recognition.onend = () => {
-				console.log('ONEND');
 				this.start();
 			};
 			recognition.start();
 		} else {
 			window.plugins.speechRecognition.startListening(result => {
 				this.parse(result.join(' '));
+				this.start();
 			}, function(err){
-				console.error(err);
+				showError(err);
 			}, {
 				language,
 				showPopup: false
@@ -113,7 +108,6 @@ const Speech = {
 	},
 	
 	parse(transcript) {
-		console.log('PARSE');
 		switch (this._phase) {
 			case 1:
 				const words = transcript.split(' ');
