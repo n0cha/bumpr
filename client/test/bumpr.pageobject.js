@@ -123,6 +123,7 @@ module.exports = function PopupPageObject(options) {
     fillPlateNumber: (inputText) => {
       waitForVisible(By.id('plateNumber'), () => {
         const input = browser.findElement(By.css('#plateNumber input'));
+        input.clear();
         input.sendKeys(inputText);
       });
     },

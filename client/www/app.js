@@ -64,7 +64,7 @@ function loadMain() {
     
     $('#like').on('click', thumbsUpButtonOnclick);
     $('#dislike').on('click', thumbsDownButtonOnclick);
-    $('#save').on('click', saveMySettings);
+    $('#save').on('click', saveNewAccount);
     $('#rankingButton').on('click', event => showRanking());
     $('#settingsButton').on('click', showSettings);
     $('#selectCountry').on('change', event => {
@@ -205,22 +205,38 @@ function showFeedback(which) {
   });
 }
 
-function saveMySettings() {
+function saveNewAccount() {
   const license = $('#plateNumber input').val();
   
   if (license.length < 1 || license.length > 9) {
     return showMessage('Type a license');
   }
-  
+
   myCountry = selectedCountry;
   myLicense = license.toLocaleUpperCase();
   
-  window.localStorage.setItem('myPlateNumber', myLicense);
-  window.localStorage.setItem('myCountry', myCountry);
-  window.localStorage.setItem('key', generateKey());
-  window.localStorage.setItem('preferredCountries', [myCountry]);
-  
-  loadMain();
+  isValidLicense(myCountry, myLicense, ()=> {
+    window.localStorage.setItem('myPlateNumber', myLicense);
+    window.localStorage.setItem('myCountry', myCountry);
+    window.localStorage.setItem('key', generateKey());
+    window.localStorage.setItem('preferredCountries', [myCountry]);
+    loadMain();
+  });
+}
+
+function isValidLicense(country, license, callback) {
+  fetch(`${apiUrl}score/${country}/${license}`)
+    .then(response => {
+      if (!response.ok) throw new Error(`${response.url}: ${response.status} ${response.statusText}`);
+      return response.json();
+    })
+    .then(json => {
+      if (json.error) return showMessage(json.message);
+      callback();
+    })
+    .catch(error => {
+      showError(error.message);
+    });
 }
 
 function isValidCountryLenght(country) {
