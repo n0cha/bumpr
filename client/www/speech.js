@@ -52,8 +52,8 @@ const Speech = {
 			this._phase = 0;
 		} else {
 			this._phase = 1;
+			this.start();
 		}
-		this.start();
 		$('#speechToggle').toggleClass('_enabled', this._phase);
 	},
 	
@@ -96,10 +96,10 @@ const Speech = {
 			recognition.start();
 		} else {
 			window.plugins.speechRecognition.startListening(result => {
-				this.parse(result.join(' '));
+				this.parse(result[0]);
 				this.start();
-			}, function(err){
-				showError(err);
+			}, () => {
+				this.start();
 			}, {
 				language,
 				showPopup: false

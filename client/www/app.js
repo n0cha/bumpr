@@ -421,10 +421,8 @@ function showSettings() {
 
 function showRanking(search) {
   let requests = [
-    new Promise((resolve) => {
-      $('#content').load('ranking.html', () => {
-        resolve();
-      });
+    new Promise(resolve => {
+      $('#content').load('ranking.html', resolve);
     }),
     fetch(`${apiUrl}top10/`),
     fetch(`${apiUrl}bottom10/`),
