@@ -13,6 +13,7 @@ const sounds = {
 
 let countries;
 let sortedCountries;
+let messageTimeout;
 
 window.onerror = showError;
 
@@ -81,7 +82,7 @@ function loadMain() {
     Speech.check(isAvailable => {
       if (isAvailable) {
         $('#speechToggle').on('click', () => {
-          Speech.toggle();
+          Speech.getLicense();
         });
       } else {
         $('#speechToggle').hide();
@@ -162,21 +163,21 @@ function calculateScore(score) {
 }
 
 function thumbsUpButtonOnclick() {
-  const validatationError = validateInput();
-  if (!validatationError) sendThumb(true);
-  else showMessage(validatationError);
+  const validationError = validateInput();
+  if (!validationError) sendThumb(true);
+  else showMessage(validationError);
 }
 
 function thumbsDownButtonOnclick() {
-  const validatationError = validateInput();
-  if (!validatationError) sendThumb(false);
-  else showMessage(validatationError);
+  const validationError = validateInput();
+  if (!validationError) sendThumb(false);
+  else showMessage(validationError);
 }
 
 function sendThumb(isUp) {
   const license = $('#plateNumber input').val();
   if (license.toLocaleUpperCase() === myLicense && selectedCountry === myCountry) {
-    showMessage('Personal feedback?!?');
+    showMessage('You can\'t provide yourself with feedback.');
     return;
   }
   
@@ -269,13 +270,13 @@ function validateInput() {
   let error = false;
   const plateNumber = $('#plateNumber input').val();
   if (plateNumber.length <= 0) {
-    error = 'Missing plate number';
+    error = 'Please enter a license plate number';
   }
   return error;
 }
 
 function showError(message) {
-  let text = 'We have encountered an issue that caused an error to happen.\nPlease restart the app and try again.';
+  let text = 'We have encountered an error.\nPlease restart the app and try again.';
   let errorMessage = `Error: ${message}`;
   
   if (message === 'Failed to fetch') {
@@ -298,11 +299,13 @@ function showError(message) {
 }
 
 function showMessage(message) {
+  clearTimeout(messageTimeout);
   $('#message').text(message).show();
-  setTimeout(hideMessage, 10000);
+  messageTimeout = setTimeout(hideMessage, 10000);
 }
 
 function hideMessage() {
+  clearTimeout(messageTimeout);
   $('#message').text('').hide();
 }
 

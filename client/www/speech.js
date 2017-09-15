@@ -4,6 +4,7 @@ const Speech = {
 	_available: false,
 	_useHTML5: false,
 	_html5Class: '',
+	_speechRecognition: null,
 	
 	check(callback) {
 		if (!window.plugins.speechRecognition) {
@@ -36,70 +37,50 @@ const Speech = {
 	checkHtml5(callback) {
 		if (window.SpeechRecognition) {
 			this._html5Class = 'SpeechRecognition';
+			this._useHTML5 = true;
 			this._available = true;
 		}
 		
 		if (window.webkitSpeechRecognition) {
 			this._html5Class = 'webkitSpeechRecognition';
+			this._useHTML5 = true;
 			this._available = true;
 		}
 		
 		return callback(this._available);
 	},
 	
-	toggle() {
-		if (this._phase) {
-			this._phase = 0;
-		} else {
-			this._phase = 1;
-			this.start();
-		}
-		$('#speechToggle').toggleClass('_enabled', this._phase);
-	},
-	
-	nextPhase() {
-		this._phase++;
-		if (this._phase > 2) {
-			this.toggle();
-		}
-	},
-	
-	start() {
-		switch(this._phase) {
-			case 1:
-				showMessage('Listening, please speak license plate number.');
-				break;
-			case 2:
-				showMessage('Please say "like", "dislike", "oops" or "stop".');
-				break;
-			default:
-				//hideMessage();
-				break;
-		}
+	listen(callback, language) {
+		language = language || this._language;
 		
-		if (!this._phase) {
-			return;
-		}
+		$('#speechToggle').addClass('_enabled');
 		
-		const language = this._phase === 2 ? 'en-GB' : this._language;
+		const done = transcript => {
+			$('#speechToggle').removeClass('_enabled');
+			if (transcript) {
+				callback(transcript);
+			} else {
+				this.listen(callback, language);
+			}
+		};
 		
 		if (this._useHTML5) {
 			const recognition = new window[this._html5Class]();
 			recognition.lang = language;
 			recognition.onresult = event => {
 				let transcript = event.results[0][0].transcript;
-				this.parse(transcript);
+				done(transcript);
 			};
-			recognition.onend = () => {
-				this.start();
-			};
+			//recognition.onend = () => {
+			//	this.start();
+			//};
 			recognition.start();
+			this._speechRecognition = recognition;
 		} else {
 			window.plugins.speechRecognition.startListening(result => {
-				this.parse(result[0]);
-				this.start();
-			}, () => {
-				this.start();
+				done(result[0]);
+			}, error => {
+				showError(error);
 			}, {
 				language,
 				showPopup: false
@@ -107,41 +88,62 @@ const Speech = {
 		}
 	},
 	
-	parse(transcript) {
-		switch (this._phase) {
-			case 1:
-				const words = transcript.split(' ');
-				let result = '';
-				_.each(words, word => {
-					if (word.match(/^[0-9A-Z]+$/)) {
-						result += word;
-						return;
-					}
-					if (word.match(/^[A-Za-z][a-z]+$/)) {
-						result += word.charAt(0);
-					}
-				});
-				$('#plateNumber input').val(result.toUpperCase());
-				this.nextPhase();
+	getLicense() {
+		$('#plateNumber input').val();
+		showMessage('Listening, please speak license plate number.');
+		this.listen(this.parseLicense.bind(this));
+	},
+	
+	parseLicense(transcript) {
+		const words = transcript.split(' ');
+		let result = '';
+		_.each(words, word => {
+			if (word.match(/^[0-9A-Z]+$/)) {
+				result += word;
+				return;
+			}
+			if (word.match(/^[A-Za-z][a-z]+$/)) {
+				result += word.charAt(0);
+			}
+		});
+		if (result) {
+			$('#plateNumber input').val(result.toUpperCase());
+			this.getAction();
+		} else {
+			this.getLicense();
+		}
+	},
+	
+	getAction() {
+		showMessage('Please say "like", "dislike", "oops" or "stop".');
+		this.listen(this.parseAction.bind(this), 'en-GB');
+	},
+	
+	parseAction(transcript) {
+		transcript = transcript.toLowerCase();
+		switch (transcript) {
+			case 'like':
+				thumbsUpButtonOnclick();
+				this.stop();
 				break;
-			case 2:
-				transcript = transcript.toLowerCase();
-				switch (transcript) {
-					case 'like':
-						thumbsUpButtonOnclick();
-						this.nextPhase();
-						break;
-					case 'dislike':
-						thumbsDownButtonOnclick();
-						this.nextPhase();
-						break;
-					case 'oops':
-						$('#plateNumber input').val('');
-						break;
-					case 'stop':
-						this.toggle();
-						break;
-				}
+			case 'dislike':
+				thumbsDownButtonOnclick();
+				this.stop();
+				break;
+			case 'oops':
+				getLicense();
+				break;
+			case 'stop':
+				this.stop();
+				break;
+		}
+	},
+	
+	stop() {
+		if (this._useHTML5) {
+			if (this._speechRecognition) {
+				this._speechRecognition.abort();
+			}
 		}
 	}
 };
