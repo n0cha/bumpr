@@ -5,6 +5,19 @@ const Speech = {
 	_useHTML5: false,
 	_html5Class: '',
 	_speechRecognition: null,
+	_numbers: {
+		'nl-NL': {
+			een: 1,
+			twee: 2,
+			drie: 3,
+			vier: 4,
+			vijf: 5,
+			zes: 6,
+			zeven: 7,
+			acht: 8,
+			negen: 9
+		}
+	},
 	
 	check(callback) {
 		if (!window.plugins.speechRecognition) {
@@ -58,6 +71,7 @@ const Speech = {
 		const done = transcript => {
 			$('#speechToggle').removeClass('_enabled');
 			if (transcript) {
+				console.log(transcript);
 				callback(transcript);
 			} else {
 				this.listen(callback, language);
@@ -89,7 +103,7 @@ const Speech = {
 	},
 	
 	getLicense() {
-		$('#plateNumber input').val();
+		$('#plateNumber input').val('');
 		showMessage('Listening, please speak license plate number.');
 		this.listen(this.parseLicense.bind(this));
 	},
@@ -98,6 +112,11 @@ const Speech = {
 		const words = transcript.split(' ');
 		let result = '';
 		_.each(words, word => {
+			const number = this._numbers[this._language][word];
+			if (number) {
+				result += number;
+				return;
+			}
 			if (word.match(/^[0-9A-Z]+$/)) {
 				result += word;
 				return;
