@@ -50,36 +50,22 @@ const SpeechApi = {
 	},
 	
 	listen(callback, language) {
-		console.log('listen');
 		language = language || this._language;
-		
-		const done = transcript => {
-			// if (transcript) {
-				console.log(transcript);
-				callback(transcript);
-			// } else {
-			// 	this.listen(callback, language);
-			// }
-		};
 		
 		if (this._useHTML5) {
 			const recognition = new window[this._html5Class]();
 			recognition.lang = language;
 			let transcript = '';
 			recognition.onresult = event => {
-				console.log('onresult', event.results[0][0].transcript);
 				transcript = event.results[0][0].transcript;
 				recognition.stop();
 			};
-			recognition.onend = () => {
-				console.log('onend');
-				_.defer(() => done(transcript));
-			};
+			recognition.onend = () => _.defer(() => callback(transcript));
 			recognition.start();
 			this._speechRecognition = recognition;
 		} else {
 			window.plugins.speechRecognition.startListening(result => {
-				done(result[0]);
+				callback(result[0]);
 			}, error => {
 				showError(error);
 			}, {

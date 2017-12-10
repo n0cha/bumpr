@@ -15,10 +15,7 @@ const Speech = {
 	},
 	
 	getLicense(callback) {
-		console.log('getLicense');
-		
 		SpeechApi.listen(transcript => {
-			console.log('parseLicense');
 			const words = transcript.split(' ');
 			let result = '';
 			_.each(words, word => {
@@ -41,10 +38,7 @@ const Speech = {
 	},
 	
 	getAction(callback) {
-		console.log('getAction');
-		
 		SpeechApi.listen(transcript => {
-			console.log('parseAction');
 			transcript = transcript.toLowerCase();
 			callback(transcript);
 		}, 'en-GB');
