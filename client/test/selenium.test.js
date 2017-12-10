@@ -13,6 +13,7 @@ test.describe('Bumpr', function tests() {
   const INVALID_LICENSE = 'TEST12';
   const MY_LICENSE = '12ab34';
   const MY_COUNTRY = 'NL';
+  const MISSING_PLATE_ERROR_MSG = 'Please enter a license plate number';
 
   test.describe('Sign up', () => {
     test.it('User needs to use a valid license', (done) => {
@@ -49,28 +50,30 @@ test.describe('Bumpr', function tests() {
       });
     });
 
-    test.it('Shows rank in the header', () => {
+    test.it('Shows rank', () => {
       app.getRank((rank) => {
         assert.equal(rank, 0);  
       });
     });
 
     test.it('Can give thumbsup', (done) => {
-      app.fillPlateNumber(TEST_LICENSE);
-      app.thumbsUp();
-      app.getMessage((message) => {
-        assert.equal(message, 'Thanks for the feedback!');
-        done();
+      app.fillPlateNumber(TEST_LICENSE, () => {
+        app.thumbsUp();
+        app.getMessage((message) => {
+          assert.equal(message, 'Thanks for the feedback!');
+          done();
+        });        
       });
     });
 
     test.it('Can give thumbsdown', (done) => {
       app.open(() => {
-        app.fillPlateNumber(TEST_LICENSE);
-        app.thumbsDown();
-        app.getMessage((message) => {
-          assert.equal(message, 'Thanks for the feedback!');
-          done();
+        app.fillPlateNumber(TEST_LICENSE, () => {
+          app.thumbsDown();
+          app.getMessage((message) => {
+            assert.equal(message, 'Thanks for the feedback!');
+            done();
+          });
         });
       })
     });
@@ -79,7 +82,7 @@ test.describe('Bumpr', function tests() {
   test.describe('Ranking screen', () => {    
     test.it('Can find license in ranking', (done) => {
       app.open(() => {
-        app.openRanking();
+        app.openMenu('ranking');
         app.search(TEST_LICENSE, (rank) => {
           assert.equal((rank > 0) , true);
           done();
@@ -106,7 +109,7 @@ test.describe('Bumpr', function tests() {
       app.close();
       app.thumbsDown();
       app.getMessage((message) => {
-        assert.equal(message, 'Missing plate number');
+        assert.equal(message, MISSING_PLATE_ERROR_MSG);
         done();
       });
     });
@@ -117,7 +120,7 @@ test.describe('Bumpr', function tests() {
       app.open(() => {
         app.getCountryListTop(1, (countries) => {
           assert.equal(countries[0], 'Netherlands (NL)');
-          app.openSettings(() => {
+          app.openMenu('settings', () => {
             app.selectPreferredCountries(['NL', 'B', 'D', 'PL'], () => {
               app.open(() => {
                 app.getCountryListTop(4, (countries) => {
@@ -135,11 +138,11 @@ test.describe('Bumpr', function tests() {
     });
 
     test.it('Can go back to main screen', (done) => {
-      app.openSettings(() => {
+      app.openMenu('settings', () => {
         app.close();
         app.thumbsDown();
         app.getMessage((message) => {
-          assert.equal(message, 'Missing plate number');
+          assert.equal(message, MISSING_PLATE_ERROR_MSG);
           done();
         });
       });
@@ -147,7 +150,7 @@ test.describe('Bumpr', function tests() {
   });
 
   test.after(() => {
-   browser.quit();
+    browser.quit();
   });
 });
 

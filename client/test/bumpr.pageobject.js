@@ -16,15 +16,18 @@ module.exports = function PopupPageObject(options) {
         callback();
       }, 60000);
     },
-    openRanking: () => {
-      waitForVisible(By.id('rankingButton'), (el) => el.click());
-    },
-    openSettings: (callback) => {
-      waitForVisible(By.id('settingsButton'), (el) => {
+    openMenu: (item, callback = () => {}) => {
+      waitForVisible(By.id('menuButton'), (el) => {
         el.click();
-        waitForVisible(backButton, () => {
-          callback();          
-        })
+        sleep(500).then(() => {      
+          browser.wait(Until.elementsLocated(By.css('li.menuOption')), 30000).then((li) => {
+            if (item === 'ranking') li[0].click();
+            if (item === 'settings') li[1].click();
+            waitForVisible(backButton, () => {
+              callback();          
+            });
+          });
+        });
       });
     },
     close: () => {
@@ -53,7 +56,9 @@ module.exports = function PopupPageObject(options) {
     },
     getCountryListTop: (top, callback) => {
       browser.wait(Until.elementsLocated(By.css(`#selectCountry option`)), 30000).then((options) => {
-        getTextOfElements(options.slice(0, top), callback);
+        sleep(5000).then(() => {
+          getTextOfElements(options.slice(0, top), callback);          
+        });
       });    
     },
     selectPreferredCountries: (countries, callback) => {

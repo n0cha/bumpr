@@ -1,4 +1,4 @@
-const apiUrl = 'http://phondr.com:3141/api/';
+const apiUrl = 'http://api.bumpr.me:3141/api/';
 var myCountry = window.localStorage.getItem('myCountry') || 'NL';
 var myLicense = (window.localStorage.getItem('myPlateNumber') || '').toLocaleUpperCase();
 let preferredCountries = window.localStorage.getItem('preferredCountries');
@@ -49,6 +49,7 @@ var app = {
 function loadMain() {
   $('#content').load('main.html', () => {
     $('#feedback').hide();
+    hideMessage();
     $(document).off('backbutton');
   
     const key = window.localStorage.getItem('key');
