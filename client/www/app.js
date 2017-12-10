@@ -367,7 +367,6 @@ function drawRankingTable(top10, bottom10, searchData) {
   var appendSearchRow = function () {
     if (searchData.rank > 10 && searchData.rank < maxRank - 9) {
       $('#rankingTable').append(createRow(searchData, 'search'));
-      
       $('#rankingTable').append(createSpacer());
     }
   };
@@ -379,7 +378,6 @@ function drawRankingTable(top10, bottom10, searchData) {
   });
   
   $('#rankingTable').append(createSpacer());
-  
   if (searchData && (searchData.country !== myCountry || searchData.license !== myLicense)) {
     if (myRank > searchData.rank) {
       appendSearchRow();
@@ -395,14 +393,11 @@ function drawRankingTable(top10, bottom10, searchData) {
   bottom10.reverse().forEach((row) => {
     $('#rankingTable').append(createRow(row, 'bottom'));
   });
-  
-  // if (searchData) {
-  //   $('.search')[0].scrollIntoView();
-  // }
 }
 
 function showSettings() {
   $('#content').load('settings.html', () => {
+    hideMessage();    
     $(document).on('backbutton', loadMain);
     $('.back').on('click', loadMain);
     const $table = $('#countries');
@@ -426,6 +421,7 @@ function showSettings() {
 function showRanking(search) {
   let requests = [
     new Promise(resolve => {
+      hideMessage();      
       $('#content').load('ranking.html', resolve);
     }),
     fetch(`${apiUrl}top10/`),
