@@ -46,6 +46,45 @@ var app = {
   }
 };
 
+function startSpeechInput() {
+  $('#speechToggle').addClass('_enabled');
+  $('#plateNumber input').val('');
+  showMessage('Listening, please speak license plate number.');
+  
+  Speech.getLicense(license => {
+    $('#plateNumber input').val(license);
+  
+    const getAction = () => {
+      $('#speechToggle').addClass('_enabled');
+      showMessage('Please say "like", "dislike", "oops" or "stop".');
+    
+      Speech.getAction(action => {
+        $('#speechToggle').removeClass('_enabled');
+        Speech.stop();
+  
+        switch (action) {
+          case 'like':
+            thumbsUpButtonOnclick();
+            break;
+          case 'dislike':
+            thumbsDownButtonOnclick();
+            break;
+          case 'oops':
+            startSpeechInput();
+            break;
+          case 'stop':
+            break;
+          default:
+            getAction();
+            break;
+        }
+      });
+    };
+  
+    getAction();
+  });
+}
+
 function loadMain() {
   $('#content').load('main.html', () => {
     $('#feedback').hide();
@@ -80,10 +119,10 @@ function loadMain() {
     $('#like').on('click', thumbsUpButtonOnclick);
     $('#dislike').on('click', thumbsDownButtonOnclick);
     $('#save').on('click', saveNewAccount);
-    Speech.check(isAvailable => {
+    SpeechApi.check(isAvailable => {
       if (isAvailable) {
         $('#speechToggle').on('click', () => {
-          Speech.getLicense();
+          startSpeechInput();
         });
       } else {
         $('#speechToggle').hide();
