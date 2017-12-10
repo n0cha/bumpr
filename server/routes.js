@@ -8,7 +8,7 @@ module.exports = function (router) {
 	
 	var pool = mysql.createPool({
 		connectionLimit: 100,
-		host: 'db.phondr.com',
+		host: 'api.bumpr.me',
 		user: 'bumpr_user',
 		password: 'FanaticalCouncilman',
 		database: 'bumpr',
